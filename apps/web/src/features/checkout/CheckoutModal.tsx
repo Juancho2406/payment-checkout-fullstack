@@ -15,7 +15,7 @@ import {
   isValidEmail,
   isValidFullName,
 } from "../../lib/identity";
-import { useAppDispatch } from "../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { BrandMark } from "./BrandMark";
 import { closeCheckoutModal, saveCheckoutDraft } from "./checkoutSlice";
 
@@ -24,17 +24,19 @@ type FieldErrors = Record<string, string>;
 export function CheckoutModal() {
   const dispatch = useAppDispatch();
   const titleId = useId();
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const savedCustomer = useAppSelector((state) => state.checkout.customer);
+  const savedDelivery = useAppSelector((state) => state.checkout.delivery);
+  const [fullName, setFullName] = useState(savedCustomer?.fullName ?? "");
+  const [email, setEmail] = useState(savedCustomer?.email ?? "");
+  const [phone, setPhone] = useState(savedCustomer?.phone ?? "");
   const [pan, setPan] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvc, setCvc] = useState("");
   const [cardholder, setCardholder] = useState("");
-  const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
-  const [region, setRegion] = useState("");
-  const [postalCode, setPostalCode] = useState("");
+  const [address, setAddress] = useState(savedDelivery?.address ?? "");
+  const [city, setCity] = useState(savedDelivery?.city ?? "");
+  const [region, setRegion] = useState(savedDelivery?.region ?? "");
+  const [postalCode, setPostalCode] = useState(savedDelivery?.postalCode ?? "");
   const [errors, setErrors] = useState<FieldErrors>({});
 
   const brand = detectCardBrand(pan);

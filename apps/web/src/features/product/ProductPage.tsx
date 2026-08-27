@@ -3,12 +3,14 @@ import { formatCopFromCents } from "../../lib/money";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { CheckoutModal } from "../checkout/CheckoutModal";
 import { openCheckoutModal } from "../checkout/checkoutSlice";
+import { SummaryBackdrop } from "../checkout/SummaryBackdrop";
 import { loadCatalog } from "./productSlice";
 
 export function ProductPage() {
   const dispatch = useAppDispatch();
   const { status, item, error } = useAppSelector((state) => state.product);
   const modalOpen = useAppSelector((state) => state.checkout.modalOpen);
+  const summaryOpen = useAppSelector((state) => state.checkout.summaryOpen);
 
   useEffect(() => {
     if (status === "idle") {
@@ -71,6 +73,7 @@ export function ProductPage() {
         </div>
       </article>
       {modalOpen ? <CheckoutModal /> : null}
+      {summaryOpen ? <SummaryBackdrop /> : null}
     </main>
   );
 }

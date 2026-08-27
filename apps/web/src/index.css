@@ -266,6 +266,78 @@ input {
   font-size: 0.8rem;
 }
 
+.button--ghost {
+  background: #fff;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.modal-backdrop--summary {
+  align-items: center;
+  padding: 16px;
+}
+
+.modal--summary {
+  width: min(100%, 480px);
+  max-height: 92vh;
+  border-radius: 16px;
+  padding: 20px 20px 24px;
+}
+
+.summary-product {
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.summary-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+}
+
+.summary-lines {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 0;
+}
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0;
+}
+
+.summary-line dt,
+.summary-line dd {
+  margin: 0;
+}
+
+.summary-line dd {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.summary-line--total {
+  border-top: 1px solid #e7e5e4;
+  padding-top: 12px;
+  margin-top: 4px;
+  font-size: 1.15rem;
+}
+
+.summary-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.summary-actions .button {
+  margin-top: 0;
+}
+
 @media (min-width: 720px) {
   .modal-backdrop {
     align-items: stretch;
@@ -313,5 +385,17 @@ input {
 
   .field-row--delivery {
     grid-template-columns: 1.2fr 1.2fr 0.8fr;
+  }
+
+  .modal-backdrop--summary {
+    padding: 40px;
+  }
+
+  .modal.modal--summary {
+    align-self: center;
+    width: min(520px, 100%);
+    height: auto;
+    max-height: min(90vh, 760px);
+    padding: 28px 32px 32px;
   }
 }

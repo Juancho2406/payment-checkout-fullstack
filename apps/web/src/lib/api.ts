@@ -49,3 +49,68 @@ function isCatalogProduct(value: unknown): value is CatalogProduct {
     typeof row.imageUrl === "string"
   );
 }
+
+export type CheckoutQuote = {
+  readonly productId: string;
+  readonly quantity: number;
+  readonly productAmountCents: number;
+  readonly baseFeeCents: number;
+  readonly deliveryFeeCents: number;
+  readonly totalCents: number;
+  readonly currency: "COP";
+  readonly stock: number;
+};
+
+export async function fetchQuote(
+  productId: string,
+  quantity = 1,
+): Promise<CheckoutQuote> {
+  const response = await fetch(`${apiBase}/checkout/quote`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ productId, quantity }),
+  });
+  if (!response.ok) {
+    throw new Error(await quoteErrorMessage(response));
+  }
+  const body: unknown = await response.json();
+  if (!isCheckoutQuote(body)) {
+    throw new Error("La cotización tiene un formato inesperado");
+  }
+  return body;
+}
+
+async function quoteErrorMessage(response: Response): Promise<string> {
+  try {
+    const body: unknown = await response.json();
+    if (body && typeof body === "object" && "error" in body) {
+      const error = (body as { error?: { code?: unknown; message?: unknown } }).error;
+      if (error?.code === "STOCK_UNAVAILABLE") {
+        return "No hay unidades suficientes";
+      }
+      if (typeof error?.message === "string" && error.message.length > 0) {
+        return error.message;
+      }
+    }
+  } catch {
+    // fall through
+  }
+  return "No se pudo calcular el total";
+}
+
+function isCheckoutQuote(value: unknown): value is CheckoutQuote {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const row = value as Record<string, unknown>;
+  return (
+    typeof row.productId === "string" &&
+    typeof row.quantity === "number" &&
+    typeof row.productAmountCents === "number" &&
+    typeof row.baseFeeCents === "number" &&
+    typeof row.deliveryFeeCents === "number" &&
+    typeof row.totalCents === "number" &&
+    row.currency === "COP" &&
+    typeof row.stock === "number"
+  );
+}

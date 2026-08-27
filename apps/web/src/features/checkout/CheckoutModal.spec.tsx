@@ -62,5 +62,6 @@ describe("CheckoutModal", () => {
     expect(checkout.customer?.email).toBe("ana@example.com");
     expect(checkout.delivery?.city).toBe("Bogotá");
     expect(checkout.modalOpen).toBe(false);
+    expect(checkout.summaryOpen).toBe(true);
   });
 });

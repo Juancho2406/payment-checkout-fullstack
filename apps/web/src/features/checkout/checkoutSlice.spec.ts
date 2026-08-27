@@ -29,5 +29,6 @@ describe("checkoutSlice", () => {
     expect(JSON.stringify(state)).not.toContain(pan);
     expect(JSON.stringify(state)).not.toContain("cvc");
     expect(state.modalOpen).toBe(false);
+    expect(state.summaryOpen).toBe(true);
   });
 });

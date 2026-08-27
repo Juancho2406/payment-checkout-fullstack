@@ -81,6 +81,9 @@
     ],
     "4c22359c9081835419aa59d314726d2386150904": [
       "RM-18"
+    ],
+    "44b7e41a3dfe5874e698a0e8c66f6d5c0df472c0": [
+      "RM-19"
     ]
   },
   "byIssue": {
@@ -621,7 +624,7 @@
       "commits": [
         {
           "message": "feat(web): add card and delivery modal",
-          "sha": ""
+          "sha": "44b7e41a3dfe5874e698a0e8c66f6d5c0df472c0"
         }
       ]
     },
@@ -631,7 +634,7 @@
       "wave": 3,
       "title": "Summary backdrop",
       "kind": "feat",
-      "status": "planned",
+      "status": "done",
       "githubIssue": {
         "number": 20,
         "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/20"
@@ -645,7 +648,12 @@
         "apps/web/src/features/checkout/SummaryBackdrop.tsx"
       ],
       "plannedCommit": "feat(web): add payment summary backdrop",
-      "commits": []
+      "commits": [
+        {
+          "message": "feat(web): add payment summary backdrop",
+          "sha": ""
+        }
+      ]
     },
     {
       "id": "RM-21",
