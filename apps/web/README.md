@@ -9,4 +9,4 @@ pnpm --filter @checkout/web start
 
 `http://localhost:5173` → producto → modal → resumen (`POST /checkout/quote`) → **Pagar** tokeniza en el browser y cobra vía nuestra API. Luego ves APPROVED/DECLINED y **Volver al producto** recarga el stock.
 
-Copia `apps/web/.env.example` y rellena `VITE_PSP_BASE_URL` + `VITE_PSP_PUBLIC_KEY` para tokenizar contra el sandbox. El PAN nunca llega a Nest.
+Copia `apps/web/.env.example` y rellena `VITE_PSP_BASE_URL` + `VITE_PSP_PUBLIC_KEY` para tokenizar contra el sandbox. El PAN nunca llega a Nest. Un refresh recupera el paso, la entrega y el `transactionId` desde `localStorage`; PAN/CVC/token no se persisten.

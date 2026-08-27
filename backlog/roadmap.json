@@ -90,6 +90,9 @@
     ],
     "1998471032b9ff36f1ec04458f1b0c7f32b2a826": [
       "RM-16"
+    ],
+    "2dcbf8460029ffd4a6c4e7bb85454c2aa3da188f": [
+      "RM-21"
     ]
   },
   "byIssue": {
@@ -689,7 +692,7 @@
       "commits": [
         {
           "message": "feat(web): add transaction status page",
-          "sha": ""
+          "sha": "2dcbf8460029ffd4a6c4e7bb85454c2aa3da188f"
         }
       ]
     },
@@ -699,7 +702,7 @@
       "wave": 3,
       "title": "Refresh-safe checkout state",
       "kind": "feat",
-      "status": "planned",
+      "status": "done",
       "githubIssue": {
         "number": 22,
         "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/22"
@@ -712,7 +715,12 @@
         "apps/web/src/store/persist.ts"
       ],
       "plannedCommit": "feat(web): persist checkout progress across refresh",
-      "commits": []
+      "commits": [
+        {
+          "message": "feat(web): persist checkout progress across refresh",
+          "sha": ""
+        }
+      ]
     },
     {
       "id": "RM-23",

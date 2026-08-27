@@ -5,6 +5,7 @@ import {
   type CheckoutState,
 } from "../features/checkout/checkoutSlice";
 import { productReducer, type ProductState } from "../features/product/productSlice";
+import { loadPersistedCheckout, savePersistedCheckout } from "./persist";
 
 export type RootState = {
   product: ProductState;
@@ -16,18 +17,28 @@ const reducer = {
   checkout: checkoutReducer,
 };
 
-export function makeStore(preloadedState?: RootState) {
-  if (!preloadedState) {
-    return configureStore({ reducer });
-  }
-  return configureStore({ reducer, preloadedState });
-}
-
 export const emptyProduct: ProductState = {
   status: "idle",
   item: null,
   error: null,
 };
+
+export function makeStore(preloadedState?: RootState) {
+  if (preloadedState) {
+    return configureStore({ reducer, preloadedState });
+  }
+  const persisted = loadPersistedCheckout();
+  const store = configureStore({
+    reducer,
+    preloadedState: persisted
+      ? { product: emptyProduct, checkout: persisted }
+      : undefined,
+  });
+  store.subscribe(() => {
+    savePersistedCheckout(store.getState());
+  });
+  return store;
+}
 
 export function testState(
   product: Partial<ProductState> = {},
