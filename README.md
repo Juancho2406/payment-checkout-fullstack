@@ -12,7 +12,7 @@ Kata de checkout: un producto, pago con tarjeta de prueba contra una pasarela **
 - **Monorepo:** pnpm workspaces, Node 22
 - **Infra:** Docker Compose (Postgres local) · AWS CDK (ECS Fargate + ALB, RDS, S3 + CloudFront). **Sin Lambda.**
 
-Hoy hay empaquetado e infra esqueleto. Nest, Vite y Prisma **aún no** están en el repo.
+Hoy hay Nest (health). Vite y Prisma **aún no**.
 
 ## Carpetas
 
@@ -28,10 +28,10 @@ Hoy hay empaquetado e infra esqueleto. Nest, Vite y Prisma **aún no** están en
 
 ```bash
 pnpm install
-docker compose -f infra/docker-compose.yml up -d
+pnpm --filter @checkout/api start
 ```
 
-Eso instala workspaces y levanta Postgres. **No hay `pnpm dev`:** la API y la SPA no arrancan todavía.
+`GET http://localhost:3000/api/v1/health` → `{ "status": "ok" }`. Postgres (Compose) no hace falta para health; Vite llega después.
 
 ## CI
 

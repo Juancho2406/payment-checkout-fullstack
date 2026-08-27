@@ -2,7 +2,7 @@
 
 Contrato de la kata: **SPA de checkout + API hexagonal + PostgreSQL**. El dibujo canónico es [`architecture.drawio`](architecture.drawio). Este markdown explica lo que el diagrama no puede: capas, ROP y qué corre dónde.
 
-**Hoy no hay Nest, Vite ni Prisma.** Lo que sigue es la topología y el diseño que se van a implementar slice a slice (`RM-10` en adelante). No hay que tratar carpetas vacías como si ya fueran el hexágono.
+**Nest existe desde `RM-10` (health).** Vite y Prisma llegan en slices posteriores. Lo que sigue es la topología y el diseño que se implementan slice a slice. Health no sustituye a products ni payments.
 
 ## Dos despliegues, el mismo código
 
@@ -57,7 +57,7 @@ Puertos que importan para esta kata (interfaces del dominio; los adapters llegan
 
 El controller HTTP es un adapter más: valida el shape del request, llama al caso de uso, traduce `Result` a status HTTP. Si el evaluador abre un controller y ve el cobro al PSP, el hexágono está mal.
 
-Cuando exista código (`RM-10`), la API se organizará en `domain` / `application` / `infrastructure` bajo `apps/api/src`. Hasta entonces esas carpetas **no** están en el repo; no las inventes al leer el árbol.
+La API se organiza en `domain` / `application` / `infrastructure` bajo `apps/api/src`. El primer slice (`RM-10`) es health; products y payments no están hasta sus RM.
 
 ## Railway Oriented Programming (ROP)
 

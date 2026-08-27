@@ -1,5 +1,9 @@
 # apps/api
 
-NestJS backend (TypeScript, hexagonal ports & adapters, Railway Oriented Programming).
+NestJS hexagonal (`@checkout/api`). Primer slice: liveness.
 
-PostgreSQL + Prisma. Business logic stays out of controllers. Code arrives story by story.
+```bash
+pnpm --filter @checkout/api start
+```
+
+`GET http://localhost:3000/api/v1/health` → `{ "status": "ok" }`. Prisma y el resto de puertos llegan en slices posteriores.

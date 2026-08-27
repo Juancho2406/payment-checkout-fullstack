@@ -341,7 +341,7 @@
       "wave": 2,
       "title": "Hexagonal NestJS health port",
       "kind": "feat",
-      "status": "planned",
+      "status": "done",
       "githubIssue": {
         "number": 10,
         "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/10"
@@ -354,7 +354,12 @@
         "apps/api/src/"
       ],
       "plannedCommit": "feat(api): add hexagonal NestJS with health port",
-      "commits": []
+      "commits": [
+        {
+          "message": "feat(api): add hexagonal NestJS with health port",
+          "sha": ""
+        }
+      ]
     },
     {
       "id": "RM-11",

@@ -2,7 +2,7 @@
 
 REST que la SPA va a consumir. Prefijo `/api/v1`. JSON. Montos en **centavos** (`COP`).
 
-**Ningún endpoint de negocio está implementado.** Nest llega en `RM-10` (health); el resto, en los slices que se indican. Swagger público (`/docs`) es `RM-24`. Hasta entonces este markdown es la fuente de verdad.
+Health está en `RM-10`. El resto de endpoints, en los slices que se indican. Swagger público (`/docs`) es `RM-24`. Hasta entonces este markdown es la fuente de verdad.
 
 Autenticación de usuario: no hay. La API es de un checkout anónimo. Las llaves del PSP no se exponen: la pública puede ir al browser; la privada y el *integrity secret* solo viven en el servidor.
 
@@ -31,7 +31,7 @@ Códigos de error de dominio (ROP → HTTP):
 
 ---
 
-## Health — no implementado (`RM-10`)
+## Health (`RM-10`)
 
 ### `GET /health`
 
