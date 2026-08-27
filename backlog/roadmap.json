@@ -8,7 +8,8 @@
   },
   "byCommit": {
     "b7fc3c48147700a1a5e15a2ee9e6841dcfd76103": ["RM-01"],
-    "ca87d274e9ad40561708917c9503d817f2ed7650": ["RM-02"]
+    "ca87d274e9ad40561708917c9503d817f2ed7650": ["RM-02"],
+    "df8a69262deb311f0294bc547aa628a9f7c3a204": ["RM-03"]
   },
   "items": [
     {
@@ -58,7 +59,12 @@
       "dependsOn": ["RM-02"],
       "introduces": ["backlog/roadmap.json"],
       "plannedCommit": "docs(backlog): add roadmap data to map commits to work slices",
-      "commits": []
+      "commits": [
+        {
+          "message": "docs(backlog): add roadmap data to map commits to work slices",
+          "sha": "df8a69262deb311f0294bc547aa628a9f7c3a204"
+        }
+      ]
     },
     {
       "id": "RM-04",
@@ -66,7 +72,7 @@
       "wave": 0,
       "title": "Target architecture draw.io",
       "kind": "docs",
-      "status": "planned",
+      "status": "done",
       "summary": "Local Compose vs AWS (CloudFront/S3, ALB, ECS Fargate, RDS). Hexagonal API as one box. No Lambda. PSP sandbox external.",
       "dependsOn": ["RM-03"],
       "introduces": ["docs/architecture.drawio"],
