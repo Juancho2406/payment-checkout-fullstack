@@ -1,0 +1,90 @@
+// Kata catalog + checkout tables. Amounts are integer COP cents. No PAN/CVC.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  description String
+  priceCents  Int
+  stock       Int
+  imageUrl    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  transactions Transaction[]
+
+  @@map("products")
+}
+
+model Customer {
+  id        String   @id @default(uuid()) @db.Uuid
+  fullName  String
+  email     String
+  phone     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions Transaction[]
+  deliveries   Delivery[]
+
+  @@map("customers")
+}
+
+enum TransactionStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  ERROR
+}
+
+model Transaction {
+  id                 String            @id @default(uuid()) @db.Uuid
+  reference          String            @unique @db.VarChar(255)
+  status             TransactionStatus
+  productId          String            @db.Uuid
+  product            Product           @relation(fields: [productId], references: [id])
+  customerId         String            @db.Uuid
+  customer           Customer          @relation(fields: [customerId], references: [id])
+  deliveryId         String?           @unique @db.Uuid
+  delivery           Delivery?         @relation("TransactionAssignedDelivery", fields: [deliveryId], references: [id])
+  quantity           Int
+  productAmountCents Int
+  baseFeeCents       Int
+  deliveryFeeCents   Int
+  totalCents         Int
+  currency           String            @default("COP")
+  pspTransactionId   String?
+  cardBrand          String?
+  cardLast4          String?           @db.VarChar(4)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  deliveries Delivery[] @relation("DeliveryBelongsToTransaction")
+
+  @@map("transactions")
+}
+
+model Delivery {
+  id            String       @id @default(uuid()) @db.Uuid
+  customerId    String       @db.Uuid
+  customer      Customer     @relation(fields: [customerId], references: [id])
+  transactionId String?      @unique @db.Uuid
+  transaction   Transaction? @relation("DeliveryBelongsToTransaction", fields: [transactionId], references: [id])
+  assignedTo    Transaction? @relation("TransactionAssignedDelivery")
+  address       String
+  city          String
+  region        String
+  postalCode    String
+  status        String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@map("deliveries")
+}

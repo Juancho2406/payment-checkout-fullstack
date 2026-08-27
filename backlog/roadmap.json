@@ -54,6 +54,9 @@
     ],
     "dc2be63cd89e198974f68d7271d0b737fb93fe73": [
       "RM-09"
+    ],
+    "ecb858e7751a7f48785ab32be05e8c4a582830b3": [
+      "RM-10"
     ]
   },
   "byIssue": {
@@ -357,7 +360,7 @@
       "commits": [
         {
           "message": "feat(api): add hexagonal NestJS with health port",
-          "sha": ""
+          "sha": "ecb858e7751a7f48785ab32be05e8c4a582830b3"
         }
       ]
     },
@@ -367,7 +370,7 @@
       "wave": 2,
       "title": "Prisma schema and product seed",
       "kind": "feat",
-      "status": "planned",
+      "status": "done",
       "githubIssue": {
         "number": 11,
         "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/11"
@@ -381,7 +384,12 @@
         "apps/api/prisma/schema.prisma"
       ],
       "plannedCommit": "feat(api): add Prisma schema and product seed",
-      "commits": []
+      "commits": [
+        {
+          "message": "feat(api): add Prisma schema and product seed",
+          "sha": ""
+        }
+      ]
     },
     {
       "id": "RM-12",
