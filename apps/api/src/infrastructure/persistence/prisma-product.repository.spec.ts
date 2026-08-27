@@ -42,4 +42,18 @@ describe("PrismaProductRepository", () => {
     await expect(repository.findById("not-a-uuid")).resolves.toBeNull();
     expect(prisma.product.findUnique).not.toHaveBeenCalled();
   });
+
+  it("returns false for reserveStock with an invalid uuid without querying", async () => {
+    const prisma = {
+      product: {
+        updateMany: jest.fn(),
+      },
+    };
+    const repository = new PrismaProductRepository(
+      prisma as unknown as PrismaService,
+    );
+
+    await expect(repository.reserveStock("not-a-uuid", 1)).resolves.toBe(false);
+    expect(prisma.product.updateMany).not.toHaveBeenCalled();
+  });
 });

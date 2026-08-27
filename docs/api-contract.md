@@ -176,11 +176,11 @@ Dirección de envío. Obligatoria **antes** de `pay` (la kata asigna la entrega 
 
 ---
 
-## Transactions — no implementado (`RM-15`, `RM-17`)
+## Transactions (`RM-15`; `pay` en `RM-17`)
 
 ### `POST /transactions` — `RM-15`
 
-Crea `PENDING`, **reserva** stock, devuelve `reference`. Aún **no** llama al PSP.
+Crea `PENDING`, **reserva** stock, devuelve `reference`. Aún **no** llama al PSP. La entrega queda `draft` (se asigna en `pay` si el cobro aprueba).
 
 ```json
 {

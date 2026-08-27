@@ -20,6 +20,10 @@ class FakeProductRepository implements ProductRepository {
   async findById(id: string): Promise<Product | null> {
     return this.catalog.find((product) => product.id === id) ?? null;
   }
+
+  async reserveStock(): Promise<boolean> {
+    return true;
+  }
 }
 
 describe("GetProductQuery", () => {

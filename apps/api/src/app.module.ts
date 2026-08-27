@@ -9,6 +9,8 @@ import { GetDeliveryQuery } from "./application/deliveries/get-delivery.query";
 import { GetHealthQuery } from "./application/health/get-health.query";
 import { GetProductQuery } from "./application/products/get-product.query";
 import { ListProductsQuery } from "./application/products/list-products.query";
+import { CreatePendingTransactionQuery } from "./application/transactions/create-pending-transaction.query";
+import { GetTransactionQuery } from "./application/transactions/get-transaction.query";
 import {
   CUSTOMER_REPOSITORY,
   type CustomerRepository,
@@ -21,15 +23,21 @@ import {
   PRODUCT_REPOSITORY,
   type ProductRepository,
 } from "./domain/product";
+import {
+  TRANSACTION_REPOSITORY,
+  type TransactionRepository,
+} from "./domain/transaction";
 import { CheckoutController } from "./infrastructure/http/checkout.controller";
 import { CustomersController } from "./infrastructure/http/customers.controller";
 import { DeliveriesController } from "./infrastructure/http/deliveries.controller";
 import { HealthController } from "./infrastructure/http/health.controller";
 import { ProductsController } from "./infrastructure/http/products.controller";
+import { TransactionsController } from "./infrastructure/http/transactions.controller";
 import { PrismaModule } from "./infrastructure/persistence/prisma.module";
 import { PrismaCustomerRepository } from "./infrastructure/persistence/prisma-customer.repository";
 import { PrismaDeliveryRepository } from "./infrastructure/persistence/prisma-delivery.repository";
 import { PrismaProductRepository } from "./infrastructure/persistence/prisma-product.repository";
+import { PrismaTransactionRepository } from "./infrastructure/persistence/prisma-transaction.repository";
 
 @Module({
   imports: [PrismaModule],
@@ -39,6 +47,7 @@ import { PrismaProductRepository } from "./infrastructure/persistence/prisma-pro
     CheckoutController,
     CustomersController,
     DeliveriesController,
+    TransactionsController,
   ],
   providers: [
     {
@@ -56,6 +65,10 @@ import { PrismaProductRepository } from "./infrastructure/persistence/prisma-pro
     {
       provide: DELIVERY_REPOSITORY,
       useClass: PrismaDeliveryRepository,
+    },
+    {
+      provide: TRANSACTION_REPOSITORY,
+      useClass: PrismaTransactionRepository,
     },
     {
       provide: ListProductsQuery,
@@ -93,6 +106,33 @@ import { PrismaProductRepository } from "./infrastructure/persistence/prisma-pro
       useFactory: (deliveries: DeliveryRepository) =>
         new GetDeliveryQuery(deliveries),
       inject: [DELIVERY_REPOSITORY],
+    },
+    {
+      provide: CreatePendingTransactionQuery,
+      useFactory: (
+        products: ProductRepository,
+        customers: CustomerRepository,
+        deliveries: DeliveryRepository,
+        transactions: TransactionRepository,
+      ) =>
+        new CreatePendingTransactionQuery(
+          products,
+          customers,
+          deliveries,
+          transactions,
+        ),
+      inject: [
+        PRODUCT_REPOSITORY,
+        CUSTOMER_REPOSITORY,
+        DELIVERY_REPOSITORY,
+        TRANSACTION_REPOSITORY,
+      ],
+    },
+    {
+      provide: GetTransactionQuery,
+      useFactory: (transactions: TransactionRepository) =>
+        new GetTransactionQuery(transactions),
+      inject: [TRANSACTION_REPOSITORY],
     },
   ],
 })

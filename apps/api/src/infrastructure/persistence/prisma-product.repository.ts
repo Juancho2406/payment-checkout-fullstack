@@ -38,4 +38,15 @@ export class PrismaProductRepository implements ProductRepository {
     });
     return row ? toProduct(row) : null;
   }
+
+  async reserveStock(id: string, quantity: number): Promise<boolean> {
+    if (!UUID_RE.test(id) || quantity < 1) {
+      return false;
+    }
+    const result = await this.prisma.product.updateMany({
+      where: { id, stock: { gte: quantity } },
+      data: { stock: { decrement: quantity } },
+    });
+    return result.count === 1;
+  }
 }
