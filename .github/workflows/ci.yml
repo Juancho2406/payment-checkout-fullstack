@@ -102,19 +102,19 @@ jobs:
           print("PSP secret upserted (value not printed)")
           PY
 
-      - name: CDK bootstrap
-        working-directory: infra/cdk
-        run: pnpm exec cdk bootstrap
-
-      - name: Pause after bootstrap
-        run: sleep 20
-
       - name: Build SPA (same-origin /api/v1 via CloudFront)
         env:
           VITE_API_BASE_URL: /api/v1
           VITE_PSP_BASE_URL: ${{ secrets.VITE_PSP_BASE_URL }}
           VITE_PSP_PUBLIC_KEY: ${{ secrets.VITE_PSP_PUBLIC_KEY }}
         run: pnpm --filter @checkout/web build
+
+      - name: CDK bootstrap
+        working-directory: infra/cdk
+        run: pnpm exec cdk bootstrap
+
+      - name: Pause after bootstrap
+        run: sleep 20
 
       - name: Deploy network (VPC)
         working-directory: infra/cdk

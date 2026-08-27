@@ -105,6 +105,9 @@
     ],
     "733087f9160cf4182b798183aac1f0d7edc24710": [
       "RM-25"
+    ],
+    "11f33ab2b69a1fb7904d4a2931bedf2c82c0b30b": [
+      "RM-26"
     ]
   },
   "byIssue": {
@@ -840,6 +843,10 @@
       "commits": [
         {
           "message": "feat(infra): deploy API and SPA on AWS",
+          "sha": "11f33ab2b69a1fb7904d4a2931bedf2c82c0b30b"
+        },
+        {
+          "message": "fix(infra): build SPA before cdk bootstrap",
           "sha": ""
         }
       ]
