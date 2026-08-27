@@ -2,7 +2,7 @@
 
 REST que la SPA va a consumir. Prefijo `/api/v1`. JSON. Montos en **centavos** (`COP`).
 
-Health está en `RM-10`. El resto de endpoints, en los slices que se indican. Swagger público (`/docs`) es `RM-24`. Hasta entonces este markdown es la fuente de verdad.
+Health está en `RM-10`. El resto de endpoints, en los slices que se indican. Swagger público: [`http://localhost:3001/docs`](http://localhost:3001/docs) (`RM-24`). Este markdown resume el mismo contrato.
 
 Autenticación de usuario: no hay. La API es de un checkout anónimo. Las llaves del PSP no se exponen: la pública puede ir al browser; la privada y el *integrity secret* solo viven en el servidor.
 

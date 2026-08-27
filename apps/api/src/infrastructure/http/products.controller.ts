@@ -5,11 +5,20 @@ import {
   HttpStatus,
   Param,
 } from "@nestjs/common";
+import {
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from "@nestjs/swagger";
 import { GetProductQuery } from "../../application/products/get-product.query";
 import { ListProductsQuery } from "../../application/products/list-products.query";
 import type { ProductNotFoundError } from "../../domain/product";
+import { ErrorResponseDto, ProductListResponseDto, ProductResponseDto } from "./openapi";
 import { toProductResponse } from "./product-response";
 
+@ApiTags("products")
 @Controller("products")
 export class ProductsController {
   constructor(
@@ -18,6 +27,8 @@ export class ProductsController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: "List the seeded catalog" })
+  @ApiOkResponse({ type: ProductListResponseDto })
   async list() {
     const result = await this.listProducts.execute();
     if (result.ok) {
@@ -30,6 +41,10 @@ export class ProductsController {
   }
 
   @Get(":id")
+  @ApiOperation({ summary: "Product detail and current stock" })
+  @ApiParam({ name: "id" })
+  @ApiOkResponse({ type: ProductResponseDto })
+  @ApiNotFoundResponse({ type: ErrorResponseDto })
   async getById(@Param("id") id: string) {
     const result = await this.getProduct.execute(id);
     if (!result.ok) {

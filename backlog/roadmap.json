@@ -96,6 +96,9 @@
     ],
     "bb6556fddd0f1b7581655aa46330443cd7126955": [
       "RM-22"
+    ],
+    "5a4e06baff37d7eddadb8f0138beb8f5bac4e72a": [
+      "RM-23"
     ]
   },
   "byIssue": {
@@ -749,7 +752,7 @@
       "commits": [
         {
           "message": "test(repo): raise Jest coverage above 80 percent",
-          "sha": ""
+          "sha": "5a4e06baff37d7eddadb8f0138beb8f5bac4e72a"
         }
       ]
     },
@@ -759,7 +762,7 @@
       "wave": 4,
       "title": "Swagger public contract",
       "kind": "docs",
-      "status": "planned",
+      "status": "done",
       "githubIssue": {
         "number": 24,
         "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/24"
@@ -772,7 +775,12 @@
         "apps/api/src/infrastructure/http/openapi.ts"
       ],
       "plannedCommit": "docs(api): expose Swagger for the public contract",
-      "commits": []
+      "commits": [
+        {
+          "message": "docs(api): expose Swagger for the public contract",
+          "sha": ""
+        }
+      ]
     },
     {
       "id": "RM-25",

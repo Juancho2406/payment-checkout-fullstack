@@ -9,6 +9,17 @@ import {
   Post,
 } from "@nestjs/common";
 import {
+  ApiBadRequestResponse,
+  ApiConflictResponse,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from "@nestjs/swagger";
+import {
   CreatePendingTransactionQuery,
   type CreatePendingTransactionError,
 } from "../../application/transactions/create-pending-transaction.query";
@@ -18,7 +29,14 @@ import {
   type PayTransactionError,
 } from "../../application/transactions/pay-transaction.query";
 import type { TransactionNotFoundError } from "../../domain/transaction";
+import {
+  CreateTransactionRequestDto,
+  ErrorResponseDto,
+  PayTransactionRequestDto,
+  TransactionResponseDto,
+} from "./openapi";
 
+@ApiTags("transactions")
 @Controller("transactions")
 export class TransactionsController {
   constructor(
@@ -28,16 +46,15 @@ export class TransactionsController {
   ) {}
 
   @Post()
-  async create(
-    @Body()
-    body: {
-      productId?: unknown;
-      quantity?: unknown;
-      customerId?: unknown;
-      deliveryId?: unknown;
-      reference?: unknown;
-    },
-  ) {
+  @ApiOperation({
+    summary: "Create a PENDING transaction and reserve stock",
+    description: "Does not call the PSP. Totals are recomputed like /checkout/quote.",
+  })
+  @ApiCreatedResponse({ type: TransactionResponseDto })
+  @ApiBadRequestResponse({ type: ErrorResponseDto })
+  @ApiNotFoundResponse({ type: ErrorResponseDto })
+  @ApiConflictResponse({ type: ErrorResponseDto })
+  async create(@Body() body: CreateTransactionRequestDto) {
     const result = await this.createPending.execute({
       productId: body?.productId,
       quantity: body?.quantity,
@@ -53,16 +70,19 @@ export class TransactionsController {
 
   @Post(":id/pay")
   @HttpCode(HttpStatus.OK)
-  async pay(
-    @Param("id") id: string,
-    @Body()
-    body: {
-      paymentToken?: unknown;
-      acceptanceToken?: unknown;
-      acceptPersonalAuth?: unknown;
-      installments?: unknown;
-    },
-  ) {
+  @ApiOperation({
+    summary: "Charge a pending transaction via the sandbox PSP",
+    description:
+      "Accepts PSP tokens from the browser. Idempotent if the transaction is already APPROVED or DECLINED. Never send PAN or CVC.",
+  })
+  @ApiParam({ name: "id" })
+  @ApiOkResponse({ type: TransactionResponseDto })
+  @ApiBadRequestResponse({ type: ErrorResponseDto })
+  @ApiNotFoundResponse({ type: ErrorResponseDto })
+  @ApiConflictResponse({ type: ErrorResponseDto })
+  @ApiResponse({ status: 402, description: "PSP_DECLINED", type: ErrorResponseDto })
+  @ApiResponse({ status: 503, description: "PSP_TIMEOUT", type: ErrorResponseDto })
+  async pay(@Param("id") id: string, @Body() body: PayTransactionRequestDto) {
     const result = await this.payTransaction.execute({
       transactionId: id,
       paymentToken: body?.paymentToken,
@@ -77,6 +97,10 @@ export class TransactionsController {
   }
 
   @Get(":id")
+  @ApiOperation({ summary: "Transaction status for the final screen and refresh" })
+  @ApiParam({ name: "id" })
+  @ApiOkResponse({ type: TransactionResponseDto })
+  @ApiNotFoundResponse({ type: ErrorResponseDto })
   async getById(@Param("id") id: string) {
     const result = await this.getTransaction.execute(id);
     if (!result.ok) {

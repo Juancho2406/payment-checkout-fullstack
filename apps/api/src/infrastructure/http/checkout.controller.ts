@@ -7,17 +7,39 @@ import {
   Post,
 } from "@nestjs/common";
 import {
+  ApiBadRequestResponse,
+  ApiConflictResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from "@nestjs/swagger";
+import {
   QuoteCheckoutQuery,
   type QuoteCheckoutError,
 } from "../../application/checkout/quote-checkout.query";
+import {
+  ErrorResponseDto,
+  QuoteRequestDto,
+  QuoteResponseDto,
+} from "./openapi";
 
+@ApiTags("checkout")
 @Controller("checkout")
 export class CheckoutController {
   constructor(private readonly quoteCheckout: QuoteCheckoutQuery) {}
 
   @Post("quote")
   @HttpCode(HttpStatus.OK)
-  async quote(@Body() body: { productId?: unknown; quantity?: unknown }) {
+  @ApiOperation({
+    summary: "Recalculate checkout totals",
+    description: "Fees are owned by the server. The client cannot set the total.",
+  })
+  @ApiOkResponse({ type: QuoteResponseDto })
+  @ApiBadRequestResponse({ type: ErrorResponseDto })
+  @ApiNotFoundResponse({ type: ErrorResponseDto })
+  @ApiConflictResponse({ type: ErrorResponseDto, description: "STOCK_UNAVAILABLE" })
+  async quote(@Body() body: QuoteRequestDto) {
     const result = await this.quoteCheckout.execute({
       productId: body?.productId,
       quantity: body?.quantity,

@@ -22,6 +22,7 @@
     "@nestjs/common": "^11.1.6",
     "@nestjs/core": "^11.1.6",
     "@nestjs/platform-express": "^11.1.6",
+    "@nestjs/swagger": "^11.4.7",
     "@prisma/client": "6.19.3",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2"
@@ -41,20 +42,30 @@
     "typescript": "^5.8.3"
   },
   "jest": {
-    "moduleFileExtensions": ["js", "json", "ts"],
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.ts$": "ts-jest"
     },
-    "setupFiles": ["reflect-metadata", "<rootDir>/../jest.setup.ts"],
+    "setupFiles": [
+      "reflect-metadata",
+      "<rootDir>/../jest.setup.ts"
+    ],
     "testEnvironment": "node",
     "collectCoverageFrom": [
       "**/*.ts",
       "!**/*.spec.ts",
       "!main.ts"
     ],
-    "coverageReporters": ["text", "text-summary"],
+    "coverageReporters": [
+      "text",
+      "text-summary"
+    ],
     "coverageThreshold": {
       "global": {
         "branches": 80,
