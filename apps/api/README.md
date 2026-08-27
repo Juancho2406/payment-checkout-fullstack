@@ -16,4 +16,6 @@ pnpm --filter @checkout/api start
 
 `POST /api/v1/transactions/:id/pay` charges the sandbox PSP (never PAN/CVC). Set `PSP_*` in `.env` for a live sandbox; unit tests use a fake gateway.
 
+Helmet + HSTS + CSP + CORS (origen de la SPA en `:5173`, más `CORS_ORIGINS` en prod).
+
 `pnpm --filter @checkout/api test` corre Jest con umbral de cobertura **80%**.

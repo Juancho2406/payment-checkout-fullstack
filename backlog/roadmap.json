@@ -99,6 +99,9 @@
     ],
     "5a4e06baff37d7eddadb8f0138beb8f5bac4e72a": [
       "RM-23"
+    ],
+    "e79a8589c89884e4002d4e1fd5fc1e2a336f4774": [
+      "RM-24"
     ]
   },
   "byIssue": {
@@ -778,7 +781,7 @@
       "commits": [
         {
           "message": "docs(api): expose Swagger for the public contract",
-          "sha": ""
+          "sha": "e79a8589c89884e4002d4e1fd5fc1e2a336f4774"
         }
       ]
     },
@@ -788,7 +791,7 @@
       "wave": 4,
       "title": "HTTPS and security headers",
       "kind": "feat",
-      "status": "planned",
+      "status": "done",
       "githubIssue": {
         "number": 25,
         "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/25"
@@ -801,7 +804,12 @@
         "apps/api/src/infrastructure/http/security.ts"
       ],
       "plannedCommit": "feat(api): add security headers",
-      "commits": []
+      "commits": [
+        {
+          "message": "feat(api): add security headers",
+          "sha": ""
+        }
+      ]
     },
     {
       "id": "RM-26",
