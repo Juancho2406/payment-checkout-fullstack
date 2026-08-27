@@ -87,7 +87,7 @@ Detalle + stock actual (la SPA vuelve aquí tras el pago).
 
 ---
 
-## Checkout quote — no implementado (`RM-13`)
+## Checkout quote (`RM-13`)
 
 ### `POST /checkout/quote`
 

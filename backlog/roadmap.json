@@ -63,6 +63,9 @@
     ],
     "5e018b3fac23d0267ee59d7a547a72b5f21e9285": [
       "RM-12"
+    ],
+    "afc453c0a096332eb078dd56d04138df7f4c8686": [
+      "RM-12"
     ]
   },
   "byIssue": {
@@ -423,7 +426,7 @@
         },
         {
           "message": "fix(api): narrow list-products Result before mapping",
-          "sha": ""
+          "sha": "afc453c0a096332eb078dd56d04138df7f4c8686"
         }
       ]
     },
@@ -433,7 +436,7 @@
       "wave": 2,
       "title": "Checkout quote (fees on server)",
       "kind": "feat",
-      "status": "planned",
+      "status": "done",
       "githubIssue": {
         "number": 13,
         "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/13"
@@ -446,7 +449,12 @@
         "apps/api/src/application/checkout/"
       ],
       "plannedCommit": "feat(api): add checkout quote endpoint",
-      "commits": []
+      "commits": [
+        {
+          "message": "feat(api): add checkout quote endpoint",
+          "sha": ""
+        }
+      ]
     },
     {
       "id": "RM-14",
