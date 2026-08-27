@@ -39,6 +39,9 @@
     ],
     "9e251ca517ac66e34bb1e73c3a1fd16aff9b5b11": [
       "RM-05"
+    ],
+    "5fe7cb12cc4e4681facede0a474abc5dfd4f92ca": [
+      "RM-06"
     ]
   },
   "byIssue": {
@@ -221,7 +224,7 @@
       "commits": [
         {
           "message": "chore(repo): add pnpm workspaces",
-          "sha": ""
+          "sha": "5fe7cb12cc4e4681facede0a474abc5dfd4f92ca"
         }
       ]
     },
@@ -231,7 +234,7 @@
       "wave": 1,
       "title": "Root README (minimum)",
       "kind": "docs",
-      "status": "planned",
+      "status": "done",
       "githubIssue": {
         "number": 7,
         "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/7"
@@ -244,7 +247,12 @@
         "README.md"
       ],
       "plannedCommit": "docs(repo): add minimum README",
-      "commits": []
+      "commits": [
+        {
+          "message": "docs(repo): add root README",
+          "sha": ""
+        }
+      ]
     },
     {
       "id": "RM-08",
