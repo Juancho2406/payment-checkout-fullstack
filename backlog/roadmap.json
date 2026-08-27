@@ -45,6 +45,9 @@
     ],
     "466439e64cbf7c65548d299dd0ecc45bed9d6e61": [
       "RM-07"
+    ],
+    "b03704a118558c92cbb30c2d0d1b133977f50f23": [
+      "RM-08"
     ]
   },
   "byIssue": {
@@ -292,7 +295,7 @@
       "commits": [
         {
           "message": "docs(kata): add architecture, data model and API contract",
-          "sha": ""
+          "sha": "b03704a118558c92cbb30c2d0d1b133977f50f23"
         }
       ]
     },
@@ -302,7 +305,7 @@
       "wave": 1,
       "title": "Single CI workflow",
       "kind": "ci",
-      "status": "planned",
+      "status": "done",
       "githubIssue": {
         "number": 9,
         "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/9"
@@ -315,7 +318,12 @@
         ".github/workflows/ci.yml"
       ],
       "plannedCommit": "ci(repo): add lint and test workflow",
-      "commits": []
+      "commits": [
+        {
+          "message": "ci: add single pnpm workspace workflow",
+          "sha": ""
+        }
+      ]
     },
     {
       "id": "RM-10",

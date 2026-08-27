@@ -7,6 +7,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "ci": "pnpm install --frozen-lockfile && pnpm -r run --if-present lint && pnpm -r run --if-present test",
     "sync:projects": "node backlog/sync-projects.mjs"
   }
 }

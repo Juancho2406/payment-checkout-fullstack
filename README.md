@@ -33,6 +33,10 @@ docker compose -f infra/docker-compose.yml up -d
 
 Eso instala workspaces y levanta Postgres. **No hay `pnpm dev`:** la API y la SPA no arrancan todavía.
 
+## CI
+
+Un workflow (`.github/workflows/ci.yml`) en `push` y `pull_request` a `main`: Node desde `.nvmrc`, pnpm vía Corepack, `pnpm install --frozen-lockfile`, y `lint`/`test` de cada workspace **si el script existe**.
+
 ## Cómo se cierra un slice
 
 Cada `RM-NN` es un issue. GitHub solo entiende `#<número>`:
