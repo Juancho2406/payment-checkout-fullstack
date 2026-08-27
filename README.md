@@ -2,7 +2,7 @@
 
 Kata de checkout: un producto, pago con tarjeta de prueba contra una pasarela **sandbox** (PSP; no se nombra la marca en el código). El trabajo se monta slice a slice (`RM-NN`).
 
-**Links** · Web: `http://localhost:5173` (local) · API: `http://localhost:3000/api/v1` · Cobertura: _pendiente_ · [Tablero](https://github.com/users/Juancho2406/projects/3)
+**Links** · Web: `http://localhost:5173` (local) · API: `http://localhost:3001/api/v1` · Cobertura: _pendiente_ · [Tablero](https://github.com/users/Juancho2406/projects/3)
 
 ## Stack (objetivo)
 
@@ -36,8 +36,8 @@ pnpm --filter @checkout/api start
 pnpm --filter @checkout/web start
 ```
 
-`GET http://localhost:3000/api/v1/health` → `{ "status": "ok" }`.
-SPA: `http://localhost:5173` (proxy `/api` → Nest).
+`GET http://localhost:3001/api/v1/health` → `{ "status": "ok" }`.
+SPA: `http://localhost:5173` (proxy `/api` → Nest en `:3001`). El puerto **3001** evita chocar con otros procesos en `:3000`.
 
 ## CI
 

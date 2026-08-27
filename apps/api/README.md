@@ -10,7 +10,7 @@ pnpm --filter @checkout/api prisma:seed
 pnpm --filter @checkout/api start
 ```
 
-`GET http://localhost:3000/api/v1/health` → `{ "status": "ok" }`.
+`GET http://localhost:3001/api/v1/health` → `{ "status": "ok" }`.
 
 `GET /api/v1/products` lists the seeded catalog (`{ "data": [ { id, name, description, priceCents, currency, stock, imageUrl } ] }`). `GET /api/v1/products/:id` returns one product or `{ "error": { "code": "NOT_FOUND", "message": "…" } }`.
 

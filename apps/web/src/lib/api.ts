@@ -13,7 +13,9 @@ const apiBase = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
 export async function fetchCatalog(): Promise<readonly CatalogProduct[]> {
   const response = await fetch(`${apiBase}/products`);
   if (!response.ok) {
-    throw new Error("No se pudo cargar el catálogo");
+    throw new Error(
+      "No se pudo cargar el catálogo. Arranca la API (Nest en :3001) y Postgres.",
+    );
   }
   const body: unknown = await response.json();
   if (!isCatalogResponse(body)) {
