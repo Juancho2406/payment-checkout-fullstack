@@ -1,10 +1,22 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { fetchQuote, type CheckoutQuote } from "../../lib/api";
+import {
+  createCustomer,
+  createDelivery,
+  createPendingTransaction,
+  fetchQuote,
+  payTransaction,
+  pollTransactionUntilTerminal,
+  type CatalogProduct,
+  type CheckoutQuote,
+  type CheckoutTransaction,
+} from "../../lib/api";
 import type { CardBrand } from "../../lib/card";
 import {
   peekCardSession,
+  peekIssuedTokens,
   saveIssuedTokens,
   takeCardSession,
+  takeIssuedTokens,
 } from "../../lib/card-session";
 import { cardSessionToTokenizeInput, tokenizeCard } from "../../lib/psp-tokenize";
 
@@ -27,9 +39,11 @@ export type CardPreview = {
 };
 
 export type QuoteStatus = "idle" | "loading" | "succeeded" | "failed";
-export type TokenizeStatus = "idle" | "loading" | "succeeded" | "failed";
+export type PaymentStatus = "idle" | "paying" | "succeeded" | "failed";
+export type CheckoutScreen = "product" | "status";
 
 export type CheckoutState = {
+  screen: CheckoutScreen;
   modalOpen: boolean;
   summaryOpen: boolean;
   customer: CustomerDraft | null;
@@ -38,11 +52,13 @@ export type CheckoutState = {
   quoteStatus: QuoteStatus;
   quote: CheckoutQuote | null;
   quoteError: string | null;
-  tokenizeStatus: TokenizeStatus;
-  tokenizeError: string | null;
+  paymentStatus: PaymentStatus;
+  paymentError: string | null;
+  transaction: CheckoutTransaction | null;
 };
 
 export const initialCheckoutState: CheckoutState = {
+  screen: "product",
   modalOpen: false,
   summaryOpen: false,
   customer: null,
@@ -51,8 +67,9 @@ export const initialCheckoutState: CheckoutState = {
   quoteStatus: "idle",
   quote: null,
   quoteError: null,
-  tokenizeStatus: "idle",
-  tokenizeError: null,
+  paymentStatus: "idle",
+  paymentError: null,
+  transaction: null,
 };
 
 export const loadQuote = createAsyncThunk(
@@ -62,16 +79,56 @@ export const loadQuote = createAsyncThunk(
   },
 );
 
-export const tokenizePaymentMethod = createAsyncThunk(
-  "checkout/tokenize",
-  async (): Promise<void> => {
+export const confirmPayment = createAsyncThunk(
+  "checkout/confirmPayment",
+  async (_, { getState }): Promise<CheckoutTransaction> => {
+    const { product, checkout } = getState() as {
+      product: { item: CatalogProduct | null };
+      checkout: CheckoutState;
+    };
+    const catalogItem = product.item;
+    const customer = checkout.customer;
+    const delivery = checkout.delivery;
+    if (!catalogItem || !customer || !delivery) {
+      throw new Error("Faltan datos del checkout");
+    }
+
+    let tokens = peekIssuedTokens();
     const card = peekCardSession();
-    if (!card) {
+    if (card) {
+      tokens = await tokenizeCard(cardSessionToTokenizeInput(card));
+      saveIssuedTokens(tokens);
+      takeCardSession();
+    }
+    if (!tokens) {
       throw new Error("Vuelve a ingresar la tarjeta");
     }
-    const tokens = await tokenizeCard(cardSessionToTokenizeInput(card));
-    saveIssuedTokens(tokens);
-    takeCardSession();
+
+    const createdCustomer = await createCustomer(customer);
+    const createdDelivery = await createDelivery({
+      customerId: createdCustomer.id,
+      address: delivery.address,
+      city: delivery.city,
+      region: delivery.region,
+      postalCode: delivery.postalCode,
+    });
+    const pending = await createPendingTransaction({
+      productId: catalogItem.id,
+      quantity: 1,
+      customerId: createdCustomer.id,
+      deliveryId: createdDelivery.id,
+    });
+    let paid = await payTransaction(pending.id, {
+      paymentToken: tokens.paymentToken,
+      acceptanceToken: tokens.acceptanceToken,
+      acceptPersonalAuth: tokens.acceptPersonalAuth,
+      installments: 1,
+    });
+    takeIssuedTokens();
+    if (paid.status === "PENDING") {
+      paid = await pollTransactionUntilTerminal(paid.id);
+    }
+    return paid;
   },
 );
 
@@ -91,8 +148,11 @@ const checkoutSlice = createSlice({
     backToCheckoutModal(state) {
       state.summaryOpen = false;
       state.modalOpen = true;
-      state.tokenizeStatus = "idle";
-      state.tokenizeError = null;
+      state.paymentStatus = "idle";
+      state.paymentError = null;
+    },
+    resetCheckout() {
+      return initialCheckoutState;
     },
     saveCheckoutDraft(
       state,
@@ -110,8 +170,9 @@ const checkoutSlice = createSlice({
       state.quoteStatus = "idle";
       state.quote = null;
       state.quoteError = null;
-      state.tokenizeStatus = "idle";
-      state.tokenizeError = null;
+      state.paymentStatus = "idle";
+      state.paymentError = null;
+      state.transaction = null;
     },
   },
   extraReducers: (builder) => {
@@ -129,16 +190,20 @@ const checkoutSlice = createSlice({
         state.quote = null;
         state.quoteError = action.error.message ?? "No se pudo calcular el total";
       })
-      .addCase(tokenizePaymentMethod.pending, (state) => {
-        state.tokenizeStatus = "loading";
-        state.tokenizeError = null;
+      .addCase(confirmPayment.pending, (state) => {
+        state.paymentStatus = "paying";
+        state.paymentError = null;
       })
-      .addCase(tokenizePaymentMethod.fulfilled, (state) => {
-        state.tokenizeStatus = "succeeded";
+      .addCase(confirmPayment.fulfilled, (state, action) => {
+        state.paymentStatus = "succeeded";
+        state.transaction = action.payload;
+        state.summaryOpen = false;
+        state.modalOpen = false;
+        state.screen = "status";
       })
-      .addCase(tokenizePaymentMethod.rejected, (state, action) => {
-        state.tokenizeStatus = "failed";
-        state.tokenizeError = action.error.message ?? "No se pudo tokenizar la tarjeta";
+      .addCase(confirmPayment.rejected, (state, action) => {
+        state.paymentStatus = "failed";
+        state.paymentError = action.error.message ?? "No se pudo completar el pago";
       });
   },
 });
@@ -148,6 +213,7 @@ export const {
   closeCheckoutModal,
   closeSummaryBackdrop,
   backToCheckoutModal,
+  resetCheckout,
   saveCheckoutDraft,
 } = checkoutSlice.actions;
 export const checkoutReducer = checkoutSlice.reducer;

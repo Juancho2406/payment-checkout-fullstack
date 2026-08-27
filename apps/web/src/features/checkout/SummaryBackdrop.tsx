@@ -6,15 +6,15 @@ import { BrandMark } from "./BrandMark";
 import {
   backToCheckoutModal,
   closeSummaryBackdrop,
+  confirmPayment,
   loadQuote,
-  tokenizePaymentMethod,
 } from "./checkoutSlice";
 
 export function SummaryBackdrop() {
   const dispatch = useAppDispatch();
   const titleId = useId();
   const product = useAppSelector((state) => state.product.item);
-  const { cardPreview, delivery, quote, quoteStatus, quoteError, tokenizeStatus, tokenizeError } =
+  const { cardPreview, delivery, quote, quoteStatus, quoteError, paymentStatus, paymentError } =
     useAppSelector((state) => state.checkout);
 
   useEffect(() => {
@@ -35,10 +35,7 @@ export function SummaryBackdrop() {
   }, [dispatch]);
 
   const canPay =
-    quoteStatus === "succeeded" &&
-    quote !== null &&
-    tokenizeStatus !== "loading" &&
-    tokenizeStatus !== "succeeded";
+    quoteStatus === "succeeded" && quote !== null && paymentStatus !== "paying";
 
   function dismissSummary() {
     clearBrowserCardSecrets();
@@ -130,9 +127,9 @@ export function SummaryBackdrop() {
           </dl>
         ) : null}
 
-        {tokenizeError ? (
+        {paymentError ? (
           <p className="error" role="alert">
-            {tokenizeError}
+            {paymentError}
           </p>
         ) : null}
 
@@ -142,13 +139,9 @@ export function SummaryBackdrop() {
             className="button"
             data-testid="confirm-pay"
             disabled={!canPay}
-            onClick={() => void dispatch(tokenizePaymentMethod())}
+            onClick={() => void dispatch(confirmPayment())}
           >
-            {tokenizeStatus === "loading"
-              ? "Tokenizando…"
-              : tokenizeStatus === "succeeded"
-                ? "Tarjeta tokenizada"
-                : "Pagar"}
+            {paymentStatus === "paying" ? "Procesando…" : "Pagar"}
           </button>
           <button
             type="button"

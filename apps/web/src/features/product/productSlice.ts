@@ -28,7 +28,9 @@ const productSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(loadCatalog.pending, (state) => {
-        state.status = "loading";
+        if (state.status !== "succeeded") {
+          state.status = "loading";
+        }
         state.error = null;
       })
       .addCase(loadCatalog.fulfilled, (state, action) => {

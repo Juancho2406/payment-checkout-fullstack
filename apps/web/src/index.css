@@ -338,6 +338,26 @@ input {
   margin-top: 0;
 }
 
+.status-card {
+  text-align: left;
+}
+
+.status-eyebrow {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.status-eyebrow--ok {
+  color: var(--accent);
+}
+
+.status-eyebrow--bad {
+  color: var(--error);
+}
+
 @media (min-width: 720px) {
   .modal-backdrop {
     align-items: stretch;

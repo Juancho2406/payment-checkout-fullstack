@@ -1,14 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
-import type { CatalogProduct, CheckoutQuote } from "../../lib/api";
+import type { CatalogProduct, CheckoutQuote, CheckoutTransaction } from "../../lib/api";
 import {
   clearBrowserCardSecrets,
   peekCardSession,
-  peekIssuedTokens,
   saveCardSession,
 } from "../../lib/card-session";
 import { tokenizeCard } from "../../lib/psp-tokenize";
+import { App } from "../../App";
 import { makeStore, testState } from "../../store/store";
 import { SummaryBackdrop } from "./SummaryBackdrop";
 
@@ -41,26 +41,92 @@ const quoteFromApi: CheckoutQuote = {
   stock: 8,
 };
 
-function renderSummary() {
-  const store = makeStore(
-    testState(
-      { status: "succeeded", item: headphones, error: null },
-      {
-        summaryOpen: true,
-        customer: {
+const approvedTx: CheckoutTransaction = {
+  id: "tx-1",
+  reference: "CHK-1",
+  status: "APPROVED",
+  productId: headphones.id,
+  customerId: "cust-1",
+  deliveryId: "del-1",
+  quantity: 1,
+  productAmountCents: 12_990_000,
+  baseFeeCents: 777_000,
+  deliveryFeeCents: 333_000,
+  totalCents: 14_100_000,
+  currency: "COP",
+  pspTransactionId: "psp-1",
+  cardBrand: "VISA",
+  cardLast4: "1111",
+};
+
+function jsonOk(body: unknown) {
+  return { ok: true, json: async () => body };
+}
+
+function stubCheckoutApi(payStatus: CheckoutTransaction["status"] = "APPROVED") {
+  const paid = { ...approvedTx, status: payStatus };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      const method = (init?.method ?? "GET").toUpperCase();
+      if (url.includes("/checkout/quote")) {
+        return jsonOk(quoteFromApi);
+      }
+      if (url.includes("/customers") && method === "POST") {
+        return jsonOk({
+          id: "cust-1",
           fullName: "Ana Pérez",
           email: "ana@example.com",
           phone: "3001112233",
-        },
-        delivery: {
+        });
+      }
+      if (url.includes("/deliveries") && method === "POST") {
+        return jsonOk({
+          id: "del-1",
+          customerId: "cust-1",
           address: "Cra 7 # 12-34",
           city: "Bogotá",
           region: "Cundinamarca",
           postalCode: "110111",
-        },
-        cardPreview: { brand: "VISA", last4: "1111" },
-      },
-    ),
+          status: "draft",
+        });
+      }
+      if (url.includes("/pay")) {
+        return jsonOk(paid);
+      }
+      if (url.endsWith("/transactions") && method === "POST") {
+        return jsonOk({ ...approvedTx, status: "PENDING", pspTransactionId: null, cardBrand: null, cardLast4: null });
+      }
+      if (url.includes("/products")) {
+        return jsonOk({ data: [{ ...headphones, stock: 7 }] });
+      }
+      throw new Error(`unexpected url ${url}`);
+    }),
+  );
+}
+
+function checkoutDraft() {
+  return {
+    summaryOpen: true as const,
+    customer: {
+      fullName: "Ana Pérez",
+      email: "ana@example.com",
+      phone: "3001112233",
+    },
+    delivery: {
+      address: "Cra 7 # 12-34",
+      city: "Bogotá",
+      region: "Cundinamarca",
+      postalCode: "110111",
+    },
+    cardPreview: { brand: "VISA" as const, last4: "1111" },
+  };
+}
+
+function renderSummary() {
+  const store = makeStore(
+    testState({ status: "succeeded", item: headphones, error: null }, checkoutDraft()),
   );
   return {
     store,
@@ -135,14 +201,8 @@ describe("SummaryBackdrop", () => {
     expect(store.getState().checkout.modalOpen).toBe(true);
   });
 
-  it("tokenizes against the PSP and never puts PAN or tok_ in Redux", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => quoteFromApi,
-      }),
-    );
+  it("tokenizes, charges via our API without PAN, and shows APPROVED", async () => {
+    stubCheckoutApi("APPROVED");
     vi.mocked(tokenizeCard).mockResolvedValue({
       paymentToken: "tok_test_visa",
       acceptanceToken: "eyJ-acceptance",
@@ -155,18 +215,33 @@ describe("SummaryBackdrop", () => {
       cardholder: "ANA PEREZ",
     });
 
+    const store = makeStore(
+      testState({ status: "succeeded", item: headphones, error: null }, checkoutDraft()),
+    );
     const user = userEvent.setup();
-    const { store } = renderSummary();
+    render(
+      <Provider store={store}>
+        <App />
+      </Provider>,
+    );
     await screen.findByText("Tarifa base");
     await user.click(screen.getByRole("button", { name: "Pagar" }));
 
-    expect(await screen.findByRole("button", { name: "Tarjeta tokenizada" })).toBeDisabled();
+    expect(await screen.findByRole("heading", { name: "Pago aprobado" })).toBeInTheDocument();
     expect(tokenizeCard).toHaveBeenCalled();
-    expect(peekIssuedTokens()?.paymentToken).toBe("tok_test_visa");
     expect(peekCardSession()).toBeNull();
     const snapshot = JSON.stringify(store.getState());
     expect(snapshot).not.toContain("4111111111111111");
     expect(snapshot).not.toContain("tok_test_visa");
     expect(snapshot.toLowerCase()).not.toContain("cvc");
+    expect(store.getState().checkout.transaction?.status).toBe("APPROVED");
+    const bodies = vi
+      .mocked(fetch)
+      .mock.calls.map((call) => call[1]?.body)
+      .filter((body): body is string => typeof body === "string");
+    for (const body of bodies) {
+      expect(body).not.toContain("4111111111111111");
+      expect(body).not.toContain('"cvc"');
+    }
   });
 });

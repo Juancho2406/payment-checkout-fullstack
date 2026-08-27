@@ -7,6 +7,6 @@ cp apps/web/.env.example apps/web/.env
 pnpm --filter @checkout/web start
 ```
 
-`http://localhost:5173` → página de producto (`GET /api/v1/products` vía proxy a Nest en `:3001`). **Pagar con tarjeta de crédito** abre el modal; **Continuar** pide `POST /checkout/quote` y muestra el resumen. **Pagar** tokeniza en el browser (llave pública del PSP). El PAN y el CVC nunca van a nuestra API ni a Redux.
+`http://localhost:5173` → producto → modal → resumen (`POST /checkout/quote`) → **Pagar** tokeniza en el browser y cobra vía nuestra API. Luego ves APPROVED/DECLINED y **Volver al producto** recarga el stock.
 
-Copia `apps/web/.env.example` y rellena `VITE_PSP_BASE_URL` + `VITE_PSP_PUBLIC_KEY` para tokenizar contra el sandbox.
+Copia `apps/web/.env.example` y rellena `VITE_PSP_BASE_URL` + `VITE_PSP_PUBLIC_KEY` para tokenizar contra el sandbox. El PAN nunca llega a Nest.
