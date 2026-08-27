@@ -1,0 +1,20 @@
+# deps
+node_modules/
+.pnpm-store/
+
+# builds
+dist/
+build/
+coverage/
+
+# env & secrets
+.env
+.env.*
+!.env.example
+
+# os / editor
+.DS_Store
+*.log
+
+# kata PDF stays local only — do not publish
+*.pdf
