@@ -4,14 +4,24 @@ import { productSeedData } from "../src/infrastructure/persistence/product-seed-
 const prisma = new PrismaClient();
 
 async function main(): Promise<void> {
-  const existing = await prisma.product.count();
-  if (existing > 0) {
-    return;
+  for (const product of productSeedData) {
+    const existing = await prisma.product.findFirst({
+      where: { name: product.name },
+    });
+    if (existing) {
+      await prisma.product.update({
+        where: { id: existing.id },
+        data: {
+          description: product.description,
+          priceCents: product.priceCents,
+          stock: product.stock,
+          imageUrl: product.imageUrl,
+        },
+      });
+      continue;
+    }
+    await prisma.product.create({ data: product });
   }
-
-  await prisma.product.createMany({
-    data: [...productSeedData],
-  });
 }
 
 main()

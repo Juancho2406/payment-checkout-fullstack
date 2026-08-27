@@ -11,7 +11,7 @@ describe("productSeedData", () => {
       expect(product.priceCents).toBeGreaterThan(0);
       expect(Number.isInteger(product.stock)).toBe(true);
       expect(product.stock).toBeGreaterThan(0);
-      expect(product.imageUrl).toMatch(/^https:\/\//);
+      expect(product.imageUrl).toMatch(/^\/products\/.+\.(jpg|png|webp)$/);
     }
   });
 });
