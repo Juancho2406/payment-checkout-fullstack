@@ -2,9 +2,9 @@
 
 Kata de checkout: un producto, pago con tarjeta de prueba contra una pasarela **sandbox** (PSP; no se nombra la marca en el código). El trabajo se monta slice a slice (`RM-NN`).
 
-**Links** · Web: `http://localhost:5173` (local) · API: `http://localhost:3001/api/v1` · Swagger: [`http://localhost:3001/docs`](http://localhost:3001/docs) · Cobertura: umbral **80%** en `pnpm --filter @checkout/api test` y `pnpm --filter @checkout/web test` · [Tablero](https://github.com/users/Juancho2406/projects/3)
+**Links** · Live: [https://d1ijyiafiowx0e.cloudfront.net](https://d1ijyiafiowx0e.cloudfront.net) · Swagger: [https://d1ijyiafiowx0e.cloudfront.net/docs](https://d1ijyiafiowx0e.cloudfront.net/docs) · Local web: `http://localhost:5173` · Local API: `http://localhost:3001/api/v1` · Cobertura: umbral **80%** · [Tablero](https://github.com/users/Juancho2406/projects/3)
 
-En `main`, GitHub Actions despliega a AWS (OIDC). La URL HTTPS de CloudFront queda en el resumen del workflow (`SpaUrl`).
+En `main`, GitHub Actions despliega a AWS (OIDC) en este orden: red → RDS → Fargate+ALB → SPA en CloudFront, con pausas y espera de `/api/v1/health`.
 
 ## Stack (objetivo)
 

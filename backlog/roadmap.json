@@ -111,6 +111,9 @@
     ],
     "7bbdbbeca7439511e65f7ae7793fb9c1f8390422": [
       "RM-26"
+    ],
+    "3f083e85919e1086de4a75e112e8974b24adc7ac": [
+      "RM-26"
     ]
   },
   "byIssue": {
@@ -854,6 +857,10 @@
         },
         {
           "message": "fix(infra): use available RDS Postgres 16.13",
+          "sha": "3f083e85919e1086de4a75e112e8974b24adc7ac"
+        },
+        {
+          "message": "docs(readme): add live CloudFront URLs",
           "sha": ""
         }
       ]
