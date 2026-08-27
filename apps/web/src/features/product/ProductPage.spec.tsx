@@ -1,7 +1,8 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import type { CatalogProduct } from "../../lib/api";
-import { makeStore } from "../../store/store";
+import { makeStore, testState } from "../../store/store";
 import { ProductPage } from "./ProductPage";
 import type { ProductState } from "./productSlice";
 
@@ -16,19 +17,22 @@ const headphones: CatalogProduct = {
 };
 
 function renderPage(product: Partial<ProductState> = {}) {
-  const store = makeStore({
-    product: {
+  const store = makeStore(
+    testState({
       status: "succeeded",
       item: headphones,
       error: null,
       ...product,
-    },
-  });
-  return render(
-    <Provider store={store}>
-      <ProductPage />
-    </Provider>,
+    }),
   );
+  return {
+    store,
+    ...render(
+      <Provider store={store}>
+        <ProductPage />
+      </Provider>,
+    ),
+  };
 }
 
 describe("ProductPage", () => {
@@ -62,5 +66,14 @@ describe("ProductPage", () => {
 
     expect(screen.getByRole("alert")).toHaveTextContent("No se pudo cargar el catálogo");
     expect(screen.getByRole("button", { name: "Reintentar" })).toBeInTheDocument();
+  });
+
+  it("opens the checkout modal from the pay button", async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.click(screen.getByRole("button", { name: "Pagar con tarjeta de crédito" }));
+
+    expect(screen.getByRole("dialog", { name: "Pago y entrega" })).toBeInTheDocument();
   });
 });

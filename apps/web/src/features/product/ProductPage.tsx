@@ -1,11 +1,14 @@
 import { useEffect } from "react";
 import { formatCopFromCents } from "../../lib/money";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { CheckoutModal } from "../checkout/CheckoutModal";
+import { openCheckoutModal } from "../checkout/checkoutSlice";
 import { loadCatalog } from "./productSlice";
 
 export function ProductPage() {
   const dispatch = useAppDispatch();
   const { status, item, error } = useAppSelector((state) => state.product);
+  const modalOpen = useAppSelector((state) => state.checkout.modalOpen);
 
   useEffect(() => {
     if (status === "idle") {
@@ -61,11 +64,13 @@ export function ProductPage() {
             className="button"
             data-testid="pay-with-card"
             disabled={outOfStock}
+            onClick={() => dispatch(openCheckoutModal())}
           >
             Pagar con tarjeta de crédito
           </button>
         </div>
       </article>
+      {modalOpen ? <CheckoutModal /> : null}
     </main>
   );
 }
