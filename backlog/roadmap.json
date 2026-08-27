@@ -57,6 +57,9 @@
     ],
     "ecb858e7751a7f48785ab32be05e8c4a582830b3": [
       "RM-10"
+    ],
+    "97d9d9cdff38de4cde660b9c1d48bd94e3fcacb6": [
+      "RM-11"
     ]
   },
   "byIssue": {
@@ -387,7 +390,7 @@
       "commits": [
         {
           "message": "feat(api): add Prisma schema and product seed",
-          "sha": ""
+          "sha": "97d9d9cdff38de4cde660b9c1d48bd94e3fcacb6"
         }
       ]
     },
@@ -397,7 +400,7 @@
       "wave": 2,
       "title": "GET /products",
       "kind": "feat",
-      "status": "planned",
+      "status": "done",
       "githubIssue": {
         "number": 12,
         "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/12"
@@ -410,7 +413,12 @@
         "apps/api/src/application/products/"
       ],
       "plannedCommit": "feat(api): add GET products endpoints",
-      "commits": []
+      "commits": [
+        {
+          "message": "feat(api): add GET products endpoints",
+          "sha": ""
+        }
+      ]
     },
     {
       "id": "RM-13",
