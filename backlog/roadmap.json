@@ -84,6 +84,9 @@
     ],
     "44b7e41a3dfe5874e698a0e8c66f6d5c0df472c0": [
       "RM-19"
+    ],
+    "749a17d96f692f5e90bd9d0260aac76661f036e3": [
+      "RM-20"
     ]
   },
   "byIssue": {
@@ -534,7 +537,7 @@
       "wave": 3,
       "title": "Client card tokenization",
       "kind": "feat",
-      "status": "planned",
+      "status": "done",
       "githubIssue": {
         "number": 16,
         "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/16"
@@ -547,7 +550,12 @@
         "apps/web/src/lib/psp-tokenize.ts"
       ],
       "plannedCommit": "feat(web): tokenize card in the browser",
-      "commits": []
+      "commits": [
+        {
+          "message": "feat(web): tokenize card in the browser",
+          "sha": ""
+        }
+      ]
     },
     {
       "id": "RM-17",
@@ -651,7 +659,7 @@
       "commits": [
         {
           "message": "feat(web): add payment summary backdrop",
-          "sha": ""
+          "sha": "749a17d96f692f5e90bd9d0260aac76661f036e3"
         }
       ]
     },

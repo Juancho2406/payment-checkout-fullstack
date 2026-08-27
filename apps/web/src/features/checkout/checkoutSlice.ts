@@ -1,6 +1,12 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import { fetchQuote, type CheckoutQuote } from "../../lib/api";
 import type { CardBrand } from "../../lib/card";
+import {
+  peekCardSession,
+  saveIssuedTokens,
+  takeCardSession,
+} from "../../lib/card-session";
+import { cardSessionToTokenizeInput, tokenizeCard } from "../../lib/psp-tokenize";
 
 export type CustomerDraft = {
   readonly fullName: string;
@@ -21,6 +27,7 @@ export type CardPreview = {
 };
 
 export type QuoteStatus = "idle" | "loading" | "succeeded" | "failed";
+export type TokenizeStatus = "idle" | "loading" | "succeeded" | "failed";
 
 export type CheckoutState = {
   modalOpen: boolean;
@@ -31,6 +38,8 @@ export type CheckoutState = {
   quoteStatus: QuoteStatus;
   quote: CheckoutQuote | null;
   quoteError: string | null;
+  tokenizeStatus: TokenizeStatus;
+  tokenizeError: string | null;
 };
 
 export const initialCheckoutState: CheckoutState = {
@@ -42,12 +51,27 @@ export const initialCheckoutState: CheckoutState = {
   quoteStatus: "idle",
   quote: null,
   quoteError: null,
+  tokenizeStatus: "idle",
+  tokenizeError: null,
 };
 
 export const loadQuote = createAsyncThunk(
   "checkout/loadQuote",
   async (input: { productId: string; quantity?: number }): Promise<CheckoutQuote> => {
     return fetchQuote(input.productId, input.quantity ?? 1);
+  },
+);
+
+export const tokenizePaymentMethod = createAsyncThunk(
+  "checkout/tokenize",
+  async (): Promise<void> => {
+    const card = peekCardSession();
+    if (!card) {
+      throw new Error("Vuelve a ingresar la tarjeta");
+    }
+    const tokens = await tokenizeCard(cardSessionToTokenizeInput(card));
+    saveIssuedTokens(tokens);
+    takeCardSession();
   },
 );
 
@@ -67,6 +91,8 @@ const checkoutSlice = createSlice({
     backToCheckoutModal(state) {
       state.summaryOpen = false;
       state.modalOpen = true;
+      state.tokenizeStatus = "idle";
+      state.tokenizeError = null;
     },
     saveCheckoutDraft(
       state,
@@ -84,6 +110,8 @@ const checkoutSlice = createSlice({
       state.quoteStatus = "idle";
       state.quote = null;
       state.quoteError = null;
+      state.tokenizeStatus = "idle";
+      state.tokenizeError = null;
     },
   },
   extraReducers: (builder) => {
@@ -100,6 +128,17 @@ const checkoutSlice = createSlice({
         state.quoteStatus = "failed";
         state.quote = null;
         state.quoteError = action.error.message ?? "No se pudo calcular el total";
+      })
+      .addCase(tokenizePaymentMethod.pending, (state) => {
+        state.tokenizeStatus = "loading";
+        state.tokenizeError = null;
+      })
+      .addCase(tokenizePaymentMethod.fulfilled, (state) => {
+        state.tokenizeStatus = "succeeded";
+      })
+      .addCase(tokenizePaymentMethod.rejected, (state, action) => {
+        state.tokenizeStatus = "failed";
+        state.tokenizeError = action.error.message ?? "No se pudo tokenizar la tarjeta";
       });
   },
 });

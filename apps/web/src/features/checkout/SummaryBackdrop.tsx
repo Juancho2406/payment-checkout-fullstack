@@ -1,4 +1,5 @@
 import { useEffect, useId } from "react";
+import { clearBrowserCardSecrets } from "../../lib/card-session";
 import { formatCopFromCents } from "../../lib/money";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { BrandMark } from "./BrandMark";
@@ -6,15 +7,15 @@ import {
   backToCheckoutModal,
   closeSummaryBackdrop,
   loadQuote,
+  tokenizePaymentMethod,
 } from "./checkoutSlice";
 
 export function SummaryBackdrop() {
   const dispatch = useAppDispatch();
   const titleId = useId();
   const product = useAppSelector((state) => state.product.item);
-  const { cardPreview, delivery, quote, quoteStatus, quoteError } = useAppSelector(
-    (state) => state.checkout,
-  );
+  const { cardPreview, delivery, quote, quoteStatus, quoteError, tokenizeStatus, tokenizeError } =
+    useAppSelector((state) => state.checkout);
 
   useEffect(() => {
     if (!product) {
@@ -26,20 +27,29 @@ export function SummaryBackdrop() {
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        dispatch(closeSummaryBackdrop());
+        dismissSummary();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [dispatch]);
 
-  const canPay = quoteStatus === "succeeded" && quote !== null;
+  const canPay =
+    quoteStatus === "succeeded" &&
+    quote !== null &&
+    tokenizeStatus !== "loading" &&
+    tokenizeStatus !== "succeeded";
+
+  function dismissSummary() {
+    clearBrowserCardSecrets();
+    dispatch(closeSummaryBackdrop());
+  }
 
   return (
     <div
       className="modal-backdrop modal-backdrop--summary"
       role="presentation"
-      onClick={() => dispatch(closeSummaryBackdrop())}
+      onClick={() => dismissSummary()}
     >
       <div
         className="modal modal--summary"
@@ -56,7 +66,7 @@ export function SummaryBackdrop() {
             type="button"
             className="icon-button"
             aria-label="Cerrar"
-            onClick={() => dispatch(closeSummaryBackdrop())}
+            onClick={() => dismissSummary()}
           >
             ×
           </button>
@@ -120,14 +130,25 @@ export function SummaryBackdrop() {
           </dl>
         ) : null}
 
+        {tokenizeError ? (
+          <p className="error" role="alert">
+            {tokenizeError}
+          </p>
+        ) : null}
+
         <div className="summary-actions">
           <button
             type="button"
             className="button"
             data-testid="confirm-pay"
             disabled={!canPay}
+            onClick={() => void dispatch(tokenizePaymentMethod())}
           >
-            Pagar
+            {tokenizeStatus === "loading"
+              ? "Tokenizando…"
+              : tokenizeStatus === "succeeded"
+                ? "Tarjeta tokenizada"
+                : "Pagar"}
           </button>
           <button
             type="button"

@@ -2,6 +2,7 @@ import { useEffect, useId, useState, type FormEvent } from "react";
 import {
   cardLast4,
   detectCardBrand,
+  digitsOnly,
   formatCardNumber,
   formatExpiry,
   isValidCardholder,
@@ -9,6 +10,7 @@ import {
   isValidExpiry,
   luhnOk,
 } from "../../lib/card";
+import { saveCardSession } from "../../lib/card-session";
 import {
   isNonEmpty,
   isValidColombianPhone,
@@ -59,6 +61,12 @@ export function CheckoutModal() {
     if (Object.keys(nextErrors).length > 0 || !resolvedBrand) {
       return;
     }
+    saveCardSession({
+      pan: digitsOnly(pan),
+      cvc,
+      expiry,
+      cardholder: cardholder.trim(),
+    });
     dispatch(
       saveCheckoutDraft({
         customer: {

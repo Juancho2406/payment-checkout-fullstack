@@ -2,8 +2,23 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
 import type { CatalogProduct, CheckoutQuote } from "../../lib/api";
+import {
+  clearBrowserCardSecrets,
+  peekCardSession,
+  peekIssuedTokens,
+  saveCardSession,
+} from "../../lib/card-session";
+import { tokenizeCard } from "../../lib/psp-tokenize";
 import { makeStore, testState } from "../../store/store";
 import { SummaryBackdrop } from "./SummaryBackdrop";
+
+vi.mock("../../lib/psp-tokenize", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../lib/psp-tokenize")>();
+  return {
+    ...actual,
+    tokenizeCard: vi.fn(),
+  };
+});
 
 const headphones: CatalogProduct = {
   id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -60,6 +75,8 @@ function renderSummary() {
 describe("SummaryBackdrop", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    clearBrowserCardSecrets();
+    vi.mocked(tokenizeCard).mockReset();
   });
 
   it("renders line items from the quote API, not invented fees", async () => {
@@ -116,5 +133,40 @@ describe("SummaryBackdrop", () => {
 
     expect(store.getState().checkout.summaryOpen).toBe(false);
     expect(store.getState().checkout.modalOpen).toBe(true);
+  });
+
+  it("tokenizes against the PSP and never puts PAN or tok_ in Redux", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => quoteFromApi,
+      }),
+    );
+    vi.mocked(tokenizeCard).mockResolvedValue({
+      paymentToken: "tok_test_visa",
+      acceptanceToken: "eyJ-acceptance",
+      acceptPersonalAuth: "eyJ-personal",
+    });
+    saveCardSession({
+      pan: "4111111111111111",
+      cvc: "123",
+      expiry: "12/29",
+      cardholder: "ANA PEREZ",
+    });
+
+    const user = userEvent.setup();
+    const { store } = renderSummary();
+    await screen.findByText("Tarifa base");
+    await user.click(screen.getByRole("button", { name: "Pagar" }));
+
+    expect(await screen.findByRole("button", { name: "Tarjeta tokenizada" })).toBeDisabled();
+    expect(tokenizeCard).toHaveBeenCalled();
+    expect(peekIssuedTokens()?.paymentToken).toBe("tok_test_visa");
+    expect(peekCardSession()).toBeNull();
+    const snapshot = JSON.stringify(store.getState());
+    expect(snapshot).not.toContain("4111111111111111");
+    expect(snapshot).not.toContain("tok_test_visa");
+    expect(snapshot.toLowerCase()).not.toContain("cvc");
   });
 });

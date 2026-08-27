@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
+import { clearBrowserCardSecrets, peekCardSession } from "../../lib/card-session";
 import { makeStore, testState } from "../../store/store";
 import { CheckoutModal } from "./CheckoutModal";
 
@@ -38,6 +39,9 @@ async function fillValidForm(user: ReturnType<typeof userEvent.setup>) {
 }
 
 describe("CheckoutModal", () => {
+  afterEach(() => {
+    clearBrowserCardSecrets();
+  });
   it("rejects a card that fails Luhn", async () => {
     const user = userEvent.setup();
     renderModal();
@@ -63,5 +67,7 @@ describe("CheckoutModal", () => {
     expect(checkout.delivery?.city).toBe("Bogotá");
     expect(checkout.modalOpen).toBe(false);
     expect(checkout.summaryOpen).toBe(true);
+    expect(peekCardSession()?.pan).toBe("4111111111111111");
+    expect(peekCardSession()?.cvc).toBe("123");
   });
 });
