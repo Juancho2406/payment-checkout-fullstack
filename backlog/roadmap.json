@@ -25,29 +25,35 @@
     }
   },
   "byCommit": {
-    "f46dd82366d5a29de73a1a209e6c71899a9c5add": [
+    "e4da8b4ca0bcccda82b89c49244d39b93434cff1": [
       "RM-01"
     ],
-    "7f65dab27bfbc3f645de50c5fa3dffd5c9cbd37c": [
+    "f8fe9e33fac0911cafb352795afe339bc2a52123": [
       "RM-02"
     ],
-    "a5575bcb5137fea3d3620b8c29eb63c99854e396": [
+    "467ddab7c550f1051540e7746d7ec688d77bcb84": [
       "RM-03"
     ],
-    "9043e761143bc87597a8ead74d5558a6c20bb7e6": [
+    "0cc29a1fbb4f9d4d14af7ca9a8e78a38e6002b03": [
       "RM-04"
     ],
-    "ed657f05d6faadfa6c4223695d44f154869008a5": [
+    "f27d81825c27edf52f5d718452ece10e29538022": [
       "RM-05"
     ],
-    "beb94f6a33eb71a815eaa88b11d9c74b010c0799": [
+    "a8923e18a195b437ef41839fb6bc62f4a96ddb3a": [
+      "RM-03"
+    ],
+    "ded045f5814989e61611de5c49bbfdb32c658098": [
       "RM-06"
     ],
-    "466439e64cbf7c65548d299dd0ecc45bed9d6e61": [
+    "fc4248935ac71b2f524b0f111432331fbf91f8c5": [
       "RM-07"
     ],
-    "b03704a118558c92cbb30c2d0d1b133977f50f23": [
+    "c00ea48088cf72a450837814c7382eb5f17ba143": [
       "RM-08"
+    ],
+    "dc2be63cd89e198974f68d7271d0b737fb93fe73": [
+      "RM-09"
     ]
   },
   "byIssue": {
@@ -99,7 +105,7 @@
       "commits": [
         {
           "message": "chore(repo): add gitignore",
-          "sha": "f46dd82366d5a29de73a1a209e6c71899a9c5add"
+          "sha": "e4da8b4ca0bcccda82b89c49244d39b93434cff1"
         }
       ]
     },
@@ -130,7 +136,7 @@
       "commits": [
         {
           "message": "chore(repo): add monorepo packaging folders",
-          "sha": "7f65dab27bfbc3f645de50c5fa3dffd5c9cbd37c"
+          "sha": "f8fe9e33fac0911cafb352795afe339bc2a52123"
         }
       ]
     },
@@ -156,7 +162,11 @@
       "commits": [
         {
           "message": "docs(backlog): add roadmap data to map commits to work slices",
-          "sha": "a5575bcb5137fea3d3620b8c29eb63c99854e396"
+          "sha": "467ddab7c550f1051540e7746d7ec688d77bcb84"
+        },
+        {
+          "message": "chore(backlog): sync roadmap items to GitHub Projects issues",
+          "sha": "a8923e18a195b437ef41839fb6bc62f4a96ddb3a"
         }
       ]
     },
@@ -182,7 +192,7 @@
       "commits": [
         {
           "message": "docs(architecture): add draw.io of target architecture",
-          "sha": "9043e761143bc87597a8ead74d5558a6c20bb7e6"
+          "sha": "0cc29a1fbb4f9d4d14af7ca9a8e78a38e6002b03"
         }
       ]
     },
@@ -209,7 +219,7 @@
       "commits": [
         {
           "message": "chore(infra): add proposed local compose and aws skeleton",
-          "sha": "ed657f05d6faadfa6c4223695d44f154869008a5"
+          "sha": "f27d81825c27edf52f5d718452ece10e29538022"
         }
       ]
     },
@@ -241,7 +251,7 @@
       "commits": [
         {
           "message": "chore(repo): add pnpm workspaces",
-          "sha": "beb94f6a33eb71a815eaa88b11d9c74b010c0799"
+          "sha": "ded045f5814989e61611de5c49bbfdb32c658098"
         }
       ]
     },
@@ -267,7 +277,7 @@
       "commits": [
         {
           "message": "docs(repo): add root README",
-          "sha": "466439e64cbf7c65548d299dd0ecc45bed9d6e61"
+          "sha": "fc4248935ac71b2f524b0f111432331fbf91f8c5"
         }
       ]
     },
@@ -295,7 +305,7 @@
       "commits": [
         {
           "message": "docs(kata): add architecture, data model and API contract",
-          "sha": "b03704a118558c92cbb30c2d0d1b133977f50f23"
+          "sha": "c00ea48088cf72a450837814c7382eb5f17ba143"
         }
       ]
     },
@@ -321,7 +331,7 @@
       "commits": [
         {
           "message": "ci: add single pnpm workspace workflow",
-          "sha": ""
+          "sha": "dc2be63cd89e198974f68d7271d0b737fb93fe73"
         }
       ]
     },
