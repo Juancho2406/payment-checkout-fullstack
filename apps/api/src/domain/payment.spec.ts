@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { integritySignature } from "./payment";
+import { defaultPaymentSleep, integritySignature, pspTimeout } from "./payment";
 
 describe("integritySignature", () => {
   it("hashes reference + amount + currency + secret as SHA-256 hex", () => {
@@ -15,5 +15,21 @@ describe("integritySignature", () => {
         .update(`${reference}${amountInCents}${currency}${secret}`)
         .digest("hex"),
     );
+  });
+});
+
+describe("pspTimeout", () => {
+  it("returns PSP_TIMEOUT", () => {
+    expect(pspTimeout().code).toBe("PSP_TIMEOUT");
+  });
+});
+
+describe("defaultPaymentSleep", () => {
+  it("resolves after the delay", async () => {
+    jest.useFakeTimers();
+    const pending = defaultPaymentSleep(25);
+    jest.advanceTimersByTime(25);
+    await pending;
+    jest.useRealTimers();
   });
 });

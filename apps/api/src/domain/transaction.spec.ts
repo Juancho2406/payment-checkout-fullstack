@@ -1,4 +1,4 @@
-import { generateReference, isValidReference } from "./transaction";
+import { generateReference, invalidReference, isValidReference } from "./transaction";
 
 describe("generateReference", () => {
   it("builds CHK-YYYYMMDD plus six hex chars", () => {
@@ -12,5 +12,11 @@ describe("isValidReference", () => {
     expect(isValidReference("CHK-20260827-AB12CD")).toBe(true);
     expect(isValidReference("")).toBe(false);
     expect(isValidReference(12)).toBe(false);
+  });
+});
+
+describe("invalidReference", () => {
+  it("explains the received value", () => {
+    expect(invalidReference(12).message).toContain("12");
   });
 });

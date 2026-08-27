@@ -95,6 +95,14 @@ describe("QuoteCheckoutQuery", () => {
     }
   });
 
+  it("returns NOT_FOUND when productId is missing", async () => {
+    const result = await query.execute({ productId: "", quantity: 1 });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("NOT_FOUND");
+    }
+  });
+
   it("returns STOCK_UNAVAILABLE when quantity exceeds stock", async () => {
     const result = await query.execute({
       productId: headphones.id,

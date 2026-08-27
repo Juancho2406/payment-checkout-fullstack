@@ -96,9 +96,40 @@ describe("UpsertCustomerQuery", () => {
       expect(result.error.code).toBe("VALIDATION_ERROR");
     }
   });
+
+  it("returns VALIDATION_ERROR when fullName or phone is not a string", async () => {
+    const query = new UpsertCustomerQuery(new FakeCustomerRepository());
+    const badName = await query.execute({
+      fullName: 1,
+      email: "ana@example.com",
+      phone: "+573001112233",
+    });
+    const badPhone = await query.execute({
+      fullName: "Ana Pérez",
+      email: "ana@example.com",
+      phone: 3001112233,
+    });
+    expect(badName.ok).toBe(false);
+    expect(badPhone.ok).toBe(false);
+  });
 });
 
 describe("GetCustomerQuery", () => {
+  it("returns the customer when it exists", async () => {
+    const row: Customer = {
+      id: "11111111-1111-4111-8111-111111111111",
+      fullName: "Ana Pérez",
+      email: "ana@example.com",
+      phone: "+573001112233",
+    };
+    const query = new GetCustomerQuery(new FakeCustomerRepository([row]));
+    const result = await query.execute(row.id);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.email).toBe(row.email);
+    }
+  });
+
   it("returns NOT_FOUND when missing", async () => {
     const query = new GetCustomerQuery(new FakeCustomerRepository());
     const result = await query.execute("00000000-0000-4000-8000-000000000000");

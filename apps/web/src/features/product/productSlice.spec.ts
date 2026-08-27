@@ -33,4 +33,21 @@ describe("productSlice", () => {
     expect(state.status).toBe("failed");
     expect(state.error).toBe("No se pudo cargar el catálogo");
   });
+
+  it("uses a fallback error message and keeps succeeded while refreshing", () => {
+    const pendingFromIdle = productReducer(undefined, loadCatalog.pending("req-3"));
+    expect(pendingFromIdle.status).toBe("loading");
+
+    const pendingFromSuccess = productReducer(
+      { status: "succeeded", item: headphones, error: null },
+      loadCatalog.pending("req-4"),
+    );
+    expect(pendingFromSuccess.status).toBe("succeeded");
+
+    const rejected = productReducer(undefined, {
+      type: loadCatalog.rejected.type,
+      error: {},
+    });
+    expect(rejected.error).toBe("No se pudo cargar el producto");
+  });
 });

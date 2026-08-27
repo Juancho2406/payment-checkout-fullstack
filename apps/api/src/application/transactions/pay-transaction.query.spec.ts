@@ -336,4 +336,86 @@ describe("PayTransactionQuery", () => {
       expect(result.error.code).toBe("NOT_FOUND");
     }
   });
+
+  it("returns NOT_FOUND when the customer is missing", async () => {
+    const transactions = new FakeTransactionRepository([{ ...pending }]);
+    const query = new PayTransactionQuery(
+      transactions,
+      new FakeCustomerRepository([]),
+      new FakePaymentGateway(),
+      settings,
+    );
+    const result = await query.execute(payBody);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("NOT_FOUND");
+    }
+  });
+
+  it("returns PSP_TIMEOUT when an existing PSP id never terminates", async () => {
+    const { query, transactions, gateway } = setup({
+      ...pending,
+      pspTransactionId: "psp-existing",
+    });
+    gateway.pollQueue = [
+      { ...approvedCharge, status: "PENDING" },
+      { ...approvedCharge, status: "PENDING" },
+      { ...approvedCharge, status: "PENDING" },
+    ];
+    const result = await query.execute(payBody);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("PSP_TIMEOUT");
+    }
+    expect(transactions.rows[0]?.status).toBe(TRANSACTION_STATUS_ERROR);
+  });
+
+  it("returns NOT_FOUND when finalizePay cannot persist", async () => {
+    const { query, transactions, gateway } = setup();
+    gateway.createResult = ok(approvedCharge);
+    transactions.finalizePay = async () => null;
+    const result = await query.execute(payBody);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("NOT_FOUND");
+    }
+  });
+
+  it("returns VALIDATION_ERROR when acceptanceToken is missing", async () => {
+    const { query } = setup();
+    const result = await query.execute({ ...payBody, acceptanceToken: "  " });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("VALIDATION_ERROR");
+    }
+  });
+
+  it("returns VALIDATION_ERROR when acceptPersonalAuth is invalid", async () => {
+    const { query } = setup();
+    const result = await query.execute({ ...payBody, acceptPersonalAuth: "  " });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("VALIDATION_ERROR");
+    }
+  });
+
+  it("returns VALIDATION_ERROR when installments is not a positive integer", async () => {
+    const { query } = setup();
+    const result = await query.execute({ ...payBody, installments: 0 });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("VALIDATION_ERROR");
+    }
+  });
+
+  it("defaults installments to 1 and omits empty acceptPersonalAuth", async () => {
+    const { query, gateway } = setup();
+    const result = await query.execute({
+      transactionId: pending.id,
+      paymentToken: "tok_test_visa",
+      acceptanceToken: "eyJ-acceptance",
+    });
+    expect(result.ok).toBe(true);
+    expect(gateway.lastCreate?.installments).toBe(1);
+  });
 });

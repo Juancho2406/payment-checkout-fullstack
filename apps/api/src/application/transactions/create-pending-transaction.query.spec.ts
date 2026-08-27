@@ -333,4 +333,67 @@ describe("CreatePendingTransactionQuery", () => {
       expect(result.error.code).toBe("NOT_FOUND");
     }
   });
+
+  it("returns NOT_FOUND when productId, customerId or deliveryId is empty", async () => {
+    const { query: create } = query();
+    for (const field of ["productId", "customerId", "deliveryId"] as const) {
+      const result = await create.execute({ ...validInput, [field]: "" });
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error.code).toBe("NOT_FOUND");
+      }
+    }
+  });
+
+  it("returns NOT_FOUND when the customer is missing", async () => {
+    const { query: create } = query();
+    const result = await create.execute({
+      ...validInput,
+      customerId: "00000000-0000-4000-8000-000000000000",
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("NOT_FOUND");
+    }
+  });
+
+  it("returns CONFLICT when the repository reports a reference race", async () => {
+    const { query: create, transactions } = query();
+    transactions.nextOutcome = "reference";
+    const result = await create.execute(validInput);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("CONFLICT");
+    }
+  });
+
+  it("returns VALIDATION_ERROR when the client reference is not a string", async () => {
+    const { query: create } = query();
+    const result = await create.execute({ ...validInput, reference: 12 });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("VALIDATION_ERROR");
+    }
+  });
+
+  it("returns VALIDATION_ERROR when the client reference is too long", async () => {
+    const { query: create } = query();
+    const result = await create.execute({
+      ...validInput,
+      reference: "x".repeat(256),
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("VALIDATION_ERROR");
+    }
+  });
+
+  it("generates a reference when the client sends an empty string", async () => {
+    const { query: create } = query();
+    const result = await create.execute({ ...validInput, reference: "   " });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value.reference).toMatch(/^CHK-\d{8}-[0-9A-F]{6}$/);
+    }
+  });
 });

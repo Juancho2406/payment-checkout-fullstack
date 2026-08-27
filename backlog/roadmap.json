@@ -93,6 +93,9 @@
     ],
     "2dcbf8460029ffd4a6c4e7bb85454c2aa3da188f": [
       "RM-21"
+    ],
+    "bb6556fddd0f1b7581655aa46330443cd7126955": [
+      "RM-22"
     ]
   },
   "byIssue": {
@@ -718,7 +721,7 @@
       "commits": [
         {
           "message": "feat(web): persist checkout progress across refresh",
-          "sha": ""
+          "sha": "bb6556fddd0f1b7581655aa46330443cd7126955"
         }
       ]
     },
@@ -728,7 +731,7 @@
       "wave": 4,
       "title": "Jest coverage above 80 percent",
       "kind": "test",
-      "status": "planned",
+      "status": "done",
       "githubIssue": {
         "number": 23,
         "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/23"
@@ -743,7 +746,12 @@
         "apps/web/src/**/*.spec.ts"
       ],
       "plannedCommit": "test(repo): raise Jest coverage above 80 percent",
-      "commits": []
+      "commits": [
+        {
+          "message": "test(repo): raise Jest coverage above 80 percent",
+          "sha": ""
+        }
+      ]
     },
     {
       "id": "RM-24",

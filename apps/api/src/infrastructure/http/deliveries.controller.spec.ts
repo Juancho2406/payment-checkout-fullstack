@@ -106,4 +106,10 @@ describe("deliveries HTTP", () => {
       })
       .expect(404);
   });
+
+  it("GET /deliveries/:id returns 404 when missing", async () => {
+    await request(app.getHttpServer())
+      .get("/api/v1/deliveries/00000000-0000-4000-8000-000000000000")
+      .expect(404);
+  });
 });

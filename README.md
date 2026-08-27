@@ -2,7 +2,7 @@
 
 Kata de checkout: un producto, pago con tarjeta de prueba contra una pasarela **sandbox** (PSP; no se nombra la marca en el código). El trabajo se monta slice a slice (`RM-NN`).
 
-**Links** · Web: `http://localhost:5173` (local) · API: `http://localhost:3001/api/v1` · Cobertura: _pendiente_ · [Tablero](https://github.com/users/Juancho2406/projects/3)
+**Links** · Web: `http://localhost:5173` (local) · API: `http://localhost:3001/api/v1` · Cobertura: umbral **80%** en `pnpm --filter @checkout/api test` y `pnpm --filter @checkout/web test` · [Tablero](https://github.com/users/Juancho2406/projects/3)
 
 ## Stack (objetivo)
 

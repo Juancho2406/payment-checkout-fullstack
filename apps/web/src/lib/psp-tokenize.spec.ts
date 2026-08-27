@@ -63,4 +63,46 @@ describe("tokenizeCard", () => {
       tokenizeCard(card, { baseUrl: "", publicKey: "", fetchImpl: vi.fn() as unknown as typeof fetch }),
     ).rejects.toThrow("Falta configurar la llave pública del PSP");
   });
+
+  it("maps merchant and card token failures", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      ok: false,
+      json: async () => ({}),
+    });
+    await expect(
+      tokenizeCard(card, {
+        baseUrl: "https://psp.example/v1",
+        publicKey: "pub_test",
+        fetchImpl: fetchImpl as unknown as typeof fetch,
+      }),
+    ).rejects.toThrow("No se pudo obtener el token de aceptación");
+  });
+
+  it("allows acceptance without personal-data auth", async () => {
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/merchants/")) {
+        return {
+          ok: true,
+          json: async () => ({
+            data: { presigned_acceptance: { acceptance_token: "eyJ-acceptance" } },
+          }),
+        };
+      }
+      return {
+        ok: true,
+        json: async () => ({ data: { id: "tok_only" } }),
+      };
+    });
+    await expect(
+      tokenizeCard(card, {
+        baseUrl: "https://psp.example/v1",
+        publicKey: "pub_test",
+        fetchImpl: fetchImpl as unknown as typeof fetch,
+      }),
+    ).resolves.toEqual({
+      paymentToken: "tok_only",
+      acceptanceToken: "eyJ-acceptance",
+    });
+  });
 });
