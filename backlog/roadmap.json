@@ -1,16 +1,73 @@
 {
   "project": "payment-checkout-fullstack",
-  "version": 1,
+  "version": 2,
   "conventions": {
-    "commitMessage": "type(scope): summary — mention the item id in the body or as (#RM-NN)",
+    "commitMessage": "type(scope): summary. Human id RM-NN may appear in the body. To move the GitHub card use Closes #<issue-number> from githubIssue.number — GitHub does not auto-link #RM-NN.",
     "afterEachCommit": "Set that item status to done, append { message, sha }. Fill the previous item sha in this commit if it was self-referential (empty). Do not add a separate 'update roadmap' commit.",
-    "lookup": "Item → commits[] is the forward map. byCommit[sha] → item ids is the reverse map."
+    "lookup": "Item → commits[] is the forward map. byCommit[sha] → item ids is the reverse map. byIssue[issueNumber] → item id. githubIssue.number is what PRs must close.",
+    "github": "Run `node backlog/sync-projects.mjs` to upsert Issues + Project V2. Re-runs are idempotent."
+  },
+  "waves": {
+    "0": "Packaging & skeleton",
+    "1": "Workspaces & docs",
+    "2": "API hexagonal vertical",
+    "3": "SPA + payment sandbox",
+    "4": "Coverage, CDK & polish"
+  },
+  "github": {
+    "owner": "Juancho2406",
+    "repo": "payment-checkout-fullstack",
+    "projectTitle": "Payment Checkout — Roadmap",
+    "project": {
+      "number": 3,
+      "url": "https://github.com/users/Juancho2406/projects/3",
+      "id": "PVT_kwHOBWcXk84BhmzK"
+    }
   },
   "byCommit": {
-    "b7fc3c48147700a1a5e15a2ee9e6841dcfd76103": ["RM-01"],
-    "ca87d274e9ad40561708917c9503d817f2ed7650": ["RM-02"],
-    "df8a69262deb311f0294bc547aa628a9f7c3a204": ["RM-03"],
-    "afeff52db1edfac9d00a3b369c1ba9d167313617": ["RM-04"]
+    "b7fc3c48147700a1a5e15a2ee9e6841dcfd76103": [
+      "RM-01"
+    ],
+    "ca87d274e9ad40561708917c9503d817f2ed7650": [
+      "RM-02"
+    ],
+    "df8a69262deb311f0294bc547aa628a9f7c3a204": [
+      "RM-03"
+    ],
+    "afeff52db1edfac9d00a3b369c1ba9d167313617": [
+      "RM-04"
+    ],
+    "9e251ca517ac66e34bb1e73c3a1fd16aff9b5b11": [
+      "RM-05"
+    ]
+  },
+  "byIssue": {
+    "1": "RM-01",
+    "2": "RM-02",
+    "3": "RM-03",
+    "4": "RM-04",
+    "5": "RM-05",
+    "6": "RM-06",
+    "7": "RM-07",
+    "8": "RM-08",
+    "9": "RM-09",
+    "10": "RM-10",
+    "11": "RM-11",
+    "12": "RM-12",
+    "13": "RM-13",
+    "14": "RM-14",
+    "15": "RM-15",
+    "16": "RM-16",
+    "17": "RM-17",
+    "18": "RM-18",
+    "19": "RM-19",
+    "20": "RM-20",
+    "21": "RM-21",
+    "22": "RM-22",
+    "23": "RM-23",
+    "24": "RM-24",
+    "25": "RM-25",
+    "26": "RM-26"
   },
   "items": [
     {
@@ -20,9 +77,15 @@
       "title": "Add gitignore",
       "kind": "chore",
       "status": "done",
+      "githubIssue": {
+        "number": 1,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/1"
+      },
       "summary": "Empty public tree; kata PDF stays local and untracked.",
       "dependsOn": [],
-      "introduces": [".gitignore"],
+      "introduces": [
+        ".gitignore"
+      ],
       "plannedCommit": "chore(repo): add gitignore",
       "commits": [
         {
@@ -38,9 +101,22 @@
       "title": "Monorepo packaging folders",
       "kind": "chore",
       "status": "done",
+      "githubIssue": {
+        "number": 2,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/2"
+      },
       "summary": "Empty boxes for api, web, infra, docs, and backlog. No app code.",
-      "dependsOn": ["RM-01"],
-      "introduces": ["apps/", "apps/api/", "apps/web/", "infra/", "docs/", "backlog/"],
+      "dependsOn": [
+        "RM-01"
+      ],
+      "introduces": [
+        "apps/",
+        "apps/api/",
+        "apps/web/",
+        "infra/",
+        "docs/",
+        "backlog/"
+      ],
       "plannedCommit": "chore(repo): add monorepo packaging folders",
       "commits": [
         {
@@ -56,9 +132,17 @@
       "title": "Backlog roadmap as data",
       "kind": "docs",
       "status": "done",
+      "githubIssue": {
+        "number": 3,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/3"
+      },
       "summary": "JSON that maps each work slice to commits so the kata history can be shown as a timeline.",
-      "dependsOn": ["RM-02"],
-      "introduces": ["backlog/roadmap.json"],
+      "dependsOn": [
+        "RM-02"
+      ],
+      "introduces": [
+        "backlog/roadmap.json"
+      ],
       "plannedCommit": "docs(backlog): add roadmap data to map commits to work slices",
       "commits": [
         {
@@ -74,9 +158,17 @@
       "title": "Target architecture draw.io",
       "kind": "docs",
       "status": "done",
+      "githubIssue": {
+        "number": 4,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/4"
+      },
       "summary": "Local Compose vs AWS (CloudFront/S3, ALB, ECS Fargate, RDS). Hexagonal API as one box. No Lambda. PSP sandbox external.",
-      "dependsOn": ["RM-03"],
-      "introduces": ["docs/architecture.drawio"],
+      "dependsOn": [
+        "RM-03"
+      ],
+      "introduces": [
+        "docs/architecture.drawio"
+      ],
       "plannedCommit": "docs(architecture): add draw.io of target architecture",
       "commits": [
         {
@@ -92,113 +184,196 @@
       "title": "Proposed infrastructure skeleton",
       "kind": "infra",
       "status": "done",
+      "githubIssue": {
+        "number": 5,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/5"
+      },
       "summary": "Runnable local Postgres via Compose, plus CDK stack stubs (Fargate/ALB, RDS, S3/CloudFront) matching the diagram.",
-      "dependsOn": ["RM-04"],
-      "introduces": ["infra/docker-compose.yml", "infra/cdk/"],
+      "dependsOn": [
+        "RM-04"
+      ],
+      "introduces": [
+        "infra/docker-compose.yml",
+        "infra/cdk/"
+      ],
       "plannedCommit": "chore(infra): add proposed local compose and aws skeleton",
-      "commits": []
+      "commits": [
+        {
+          "message": "chore(infra): add proposed local compose and aws skeleton",
+          "sha": "9e251ca517ac66e34bb1e73c3a1fd16aff9b5b11"
+        }
+      ]
     },
     {
       "id": "RM-06",
       "seq": 6,
-      "wave": 0,
+      "wave": 1,
       "title": "pnpm workspaces",
       "kind": "chore",
       "status": "planned",
+      "githubIssue": {
+        "number": 6,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/6"
+      },
       "summary": "Root package.json + pnpm-workspace.yaml so apps/api, apps/web, and infra can install. Still no Nest/Vite app.",
-      "dependsOn": ["RM-02"],
-      "introduces": ["package.json", "pnpm-workspace.yaml", ".nvmrc"],
+      "dependsOn": [
+        "RM-02"
+      ],
+      "introduces": [
+        "package.json",
+        "pnpm-workspace.yaml",
+        ".nvmrc"
+      ],
       "plannedCommit": "chore(repo): add pnpm workspaces",
       "commits": []
     },
     {
       "id": "RM-07",
       "seq": 7,
-      "wave": 0,
+      "wave": 1,
       "title": "Root README (minimum)",
       "kind": "docs",
       "status": "planned",
+      "githubIssue": {
+        "number": 7,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/7"
+      },
       "summary": "What the kata is, stack, how folders map. Deploy/Swagger/coverage links stay pending.",
-      "dependsOn": ["RM-02"],
-      "introduces": ["README.md"],
+      "dependsOn": [
+        "RM-02"
+      ],
+      "introduces": [
+        "README.md"
+      ],
       "plannedCommit": "docs(repo): add minimum README",
       "commits": []
     },
     {
       "id": "RM-08",
       "seq": 8,
-      "wave": 0,
+      "wave": 1,
       "title": "Kata contract docs",
       "kind": "docs",
       "status": "planned",
+      "githubIssue": {
+        "number": 8,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/8"
+      },
       "summary": "Architecture narrative, ER (products, customers, deliveries, transactions), API contract. PSP never named as the company.",
-      "dependsOn": ["RM-04"],
-      "introduces": ["docs/architecture.md", "docs/data-model.md", "docs/api-contract.md"],
+      "dependsOn": [
+        "RM-04"
+      ],
+      "introduces": [
+        "docs/architecture.md",
+        "docs/data-model.md",
+        "docs/api-contract.md"
+      ],
       "plannedCommit": "docs(kata): add architecture, data model and API contract",
       "commits": []
     },
     {
       "id": "RM-09",
       "seq": 9,
-      "wave": 0,
+      "wave": 1,
       "title": "Single CI workflow",
       "kind": "ci",
       "status": "planned",
+      "githubIssue": {
+        "number": 9,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/9"
+      },
       "summary": "One GitHub Actions workflow for lint/test. No deploy pipelines until there is an image.",
-      "dependsOn": ["RM-06"],
-      "introduces": [".github/workflows/ci.yml"],
+      "dependsOn": [
+        "RM-06"
+      ],
+      "introduces": [
+        ".github/workflows/ci.yml"
+      ],
       "plannedCommit": "ci(repo): add lint and test workflow",
       "commits": []
     },
     {
       "id": "RM-10",
       "seq": 10,
-      "wave": 1,
+      "wave": 2,
       "title": "Hexagonal NestJS health port",
       "kind": "feat",
       "status": "planned",
+      "githubIssue": {
+        "number": 10,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/10"
+      },
       "summary": "Real Nest app with domain/application/infrastructure and a health (or ping) port. Not empty folders.",
-      "dependsOn": ["RM-06"],
-      "introduces": ["apps/api/src/"],
+      "dependsOn": [
+        "RM-06"
+      ],
+      "introduces": [
+        "apps/api/src/"
+      ],
       "plannedCommit": "feat(api): add hexagonal NestJS with health port",
       "commits": []
     },
     {
       "id": "RM-11",
       "seq": 11,
-      "wave": 1,
+      "wave": 2,
       "title": "Prisma schema and product seed",
       "kind": "feat",
       "status": "planned",
+      "githubIssue": {
+        "number": 11,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/11"
+      },
       "summary": "Four entities, amounts in cents, no PAN. Seed dummy products. Uses Compose Postgres from RM-05.",
-      "dependsOn": ["RM-05", "RM-10"],
-      "introduces": ["apps/api/prisma/schema.prisma"],
+      "dependsOn": [
+        "RM-05",
+        "RM-10"
+      ],
+      "introduces": [
+        "apps/api/prisma/schema.prisma"
+      ],
       "plannedCommit": "feat(api): add Prisma schema and product seed",
       "commits": []
     },
     {
       "id": "RM-12",
       "seq": 12,
-      "wave": 1,
+      "wave": 2,
       "title": "GET /products",
       "kind": "feat",
       "status": "planned",
+      "githubIssue": {
+        "number": 12,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/12"
+      },
       "summary": "List and detail with stock. No create-product endpoint (kata).",
-      "dependsOn": ["RM-11"],
-      "introduces": ["apps/api/src/application/products/"],
+      "dependsOn": [
+        "RM-11"
+      ],
+      "introduces": [
+        "apps/api/src/application/products/"
+      ],
       "plannedCommit": "feat(api): add GET products endpoints",
       "commits": []
     },
     {
       "id": "RM-13",
       "seq": 13,
-      "wave": 1,
+      "wave": 2,
       "title": "Checkout quote (fees on server)",
       "kind": "feat",
       "status": "planned",
+      "githubIssue": {
+        "number": 13,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/13"
+      },
       "summary": "POST /checkout/quote recalculates product + base fee + delivery fee. Front does not invent totals.",
-      "dependsOn": ["RM-12"],
-      "introduces": ["apps/api/src/application/checkout/"],
+      "dependsOn": [
+        "RM-12"
+      ],
+      "introduces": [
+        "apps/api/src/application/checkout/"
+      ],
       "plannedCommit": "feat(api): add checkout quote endpoint",
       "commits": []
     },
@@ -209,9 +384,18 @@
       "title": "Customers and deliveries",
       "kind": "feat",
       "status": "planned",
+      "githubIssue": {
+        "number": 14,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/14"
+      },
       "summary": "Persist customer + delivery address. Required before assigning delivery after payment.",
-      "dependsOn": ["RM-11"],
-      "introduces": ["apps/api/src/application/customers/", "apps/api/src/application/deliveries/"],
+      "dependsOn": [
+        "RM-11"
+      ],
+      "introduces": [
+        "apps/api/src/application/customers/",
+        "apps/api/src/application/deliveries/"
+      ],
       "plannedCommit": "feat(api): add customers and deliveries",
       "commits": []
     },
@@ -222,22 +406,39 @@
       "title": "Create PENDING transaction",
       "kind": "feat",
       "status": "planned",
+      "githubIssue": {
+        "number": 15,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/15"
+      },
       "summary": "POST /transactions creates PENDING and returns a reference. Reserve stock.",
-      "dependsOn": ["RM-13", "RM-14"],
-      "introduces": ["apps/api/src/application/transactions/"],
+      "dependsOn": [
+        "RM-13",
+        "RM-14"
+      ],
+      "introduces": [
+        "apps/api/src/application/transactions/"
+      ],
       "plannedCommit": "feat(api): create PENDING transactions",
       "commits": []
     },
     {
       "id": "RM-16",
       "seq": 16,
-      "wave": 2,
+      "wave": 3,
       "title": "Client card tokenization",
       "kind": "feat",
       "status": "planned",
+      "githubIssue": {
+        "number": 16,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/16"
+      },
       "summary": "Browser tokenizes with PSP public key. API never sees PAN/CVC. Port is createCharge/getChargeStatus only.",
-      "dependsOn": ["RM-18"],
-      "introduces": ["apps/web/src/lib/psp-tokenize.ts"],
+      "dependsOn": [
+        "RM-18"
+      ],
+      "introduces": [
+        "apps/web/src/lib/psp-tokenize.ts"
+      ],
       "plannedCommit": "feat(web): tokenize card in the browser",
       "commits": []
     },
@@ -248,22 +449,39 @@
       "title": "Pay orchestration (ROP)",
       "kind": "feat",
       "status": "planned",
+      "githubIssue": {
+        "number": 17,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/17"
+      },
       "summary": "POST /transactions/:id/pay with paymentToken. PSP sandbox APPROVED/DECLINED. Delivery + stock. Idempotent by reference.",
-      "dependsOn": ["RM-15"],
-      "introduces": ["apps/api/src/application/transactions/pay-transaction.use-case.ts"],
+      "dependsOn": [
+        "RM-15"
+      ],
+      "introduces": [
+        "apps/api/src/application/transactions/pay-transaction.use-case.ts"
+      ],
       "plannedCommit": "feat(api): orchestrate sandbox payment with ROP",
       "commits": []
     },
     {
       "id": "RM-18",
       "seq": 18,
-      "wave": 1,
+      "wave": 3,
       "title": "SPA product page",
       "kind": "feat",
       "status": "planned",
+      "githubIssue": {
+        "number": 18,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/18"
+      },
       "summary": "React + Redux. Product, price, stock, Pay with credit card. Reads GET /products.",
-      "dependsOn": ["RM-06", "RM-12"],
-      "introduces": ["apps/web/src/"],
+      "dependsOn": [
+        "RM-06",
+        "RM-12"
+      ],
+      "introduces": [
+        "apps/web/src/"
+      ],
       "plannedCommit": "feat(web): add product page",
       "commits": []
     },
@@ -274,9 +492,17 @@
       "title": "Card and delivery modal",
       "kind": "feat",
       "status": "planned",
+      "githubIssue": {
+        "number": 19,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/19"
+      },
       "summary": "Fake Visa/Mastercard format, Luhn, brand logos. Delivery fields. No PAN in Redux persist.",
-      "dependsOn": ["RM-18"],
-      "introduces": ["apps/web/src/features/checkout/"],
+      "dependsOn": [
+        "RM-18"
+      ],
+      "introduces": [
+        "apps/web/src/features/checkout/"
+      ],
       "plannedCommit": "feat(web): add card and delivery modal",
       "commits": []
     },
@@ -287,9 +513,18 @@
       "title": "Summary backdrop",
       "kind": "feat",
       "status": "planned",
+      "githubIssue": {
+        "number": 20,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/20"
+      },
       "summary": "Material backdrop: product amount + base fee + delivery fee. Pay button. Totals from quote API.",
-      "dependsOn": ["RM-13", "RM-19"],
-      "introduces": ["apps/web/src/features/checkout/SummaryBackdrop.tsx"],
+      "dependsOn": [
+        "RM-13",
+        "RM-19"
+      ],
+      "introduces": [
+        "apps/web/src/features/checkout/SummaryBackdrop.tsx"
+      ],
       "plannedCommit": "feat(web): add payment summary backdrop",
       "commits": []
     },
@@ -300,9 +535,18 @@
       "title": "Final status and return to product",
       "kind": "feat",
       "status": "planned",
+      "githubIssue": {
+        "number": 21,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/21"
+      },
       "summary": "Show APPROVED/DECLINED and redirect to product with updated stock.",
-      "dependsOn": ["RM-17", "RM-20"],
-      "introduces": ["apps/web/src/pages/StatusPage.tsx"],
+      "dependsOn": [
+        "RM-17",
+        "RM-20"
+      ],
+      "introduces": [
+        "apps/web/src/pages/StatusPage.tsx"
+      ],
       "plannedCommit": "feat(web): add transaction status page",
       "commits": []
     },
@@ -313,9 +557,17 @@
       "title": "Refresh-safe checkout state",
       "kind": "feat",
       "status": "planned",
+      "githubIssue": {
+        "number": 22,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/22"
+      },
       "summary": "Redux + localStorage for step, delivery, productId, transactionId. Never PAN/CVC.",
-      "dependsOn": ["RM-18"],
-      "introduces": ["apps/web/src/store/persist.ts"],
+      "dependsOn": [
+        "RM-18"
+      ],
+      "introduces": [
+        "apps/web/src/store/persist.ts"
+      ],
       "plannedCommit": "feat(web): persist checkout progress across refresh",
       "commits": []
     },
@@ -326,9 +578,19 @@
       "title": "Jest coverage above 80 percent",
       "kind": "test",
       "status": "planned",
+      "githubIssue": {
+        "number": 23,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/23"
+      },
       "summary": "Unit tests on API use cases and web validators/reducers. Gate belongs here, not on empty scaffold.",
-      "dependsOn": ["RM-17", "RM-21"],
-      "introduces": ["apps/api/src/**/*.spec.ts", "apps/web/src/**/*.spec.ts"],
+      "dependsOn": [
+        "RM-17",
+        "RM-21"
+      ],
+      "introduces": [
+        "apps/api/src/**/*.spec.ts",
+        "apps/web/src/**/*.spec.ts"
+      ],
       "plannedCommit": "test(repo): raise Jest coverage above 80 percent",
       "commits": []
     },
@@ -339,9 +601,17 @@
       "title": "Swagger public contract",
       "kind": "docs",
       "status": "planned",
+      "githubIssue": {
+        "number": 24,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/24"
+      },
       "summary": "Public /docs (or Postman) linked from README. Kata README rubric.",
-      "dependsOn": ["RM-17"],
-      "introduces": ["apps/api/src/infrastructure/http/openapi.ts"],
+      "dependsOn": [
+        "RM-17"
+      ],
+      "introduces": [
+        "apps/api/src/infrastructure/http/openapi.ts"
+      ],
       "plannedCommit": "docs(api): expose Swagger for the public contract",
       "commits": []
     },
@@ -352,9 +622,17 @@
       "title": "HTTPS and security headers",
       "kind": "feat",
       "status": "planned",
+      "githubIssue": {
+        "number": 25,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/25"
+      },
       "summary": "Helmet, HSTS, CSP, CORS to the SPA origin. Bonus OWASP.",
-      "dependsOn": ["RM-10"],
-      "introduces": ["apps/api/src/infrastructure/http/security.ts"],
+      "dependsOn": [
+        "RM-10"
+      ],
+      "introduces": [
+        "apps/api/src/infrastructure/http/security.ts"
+      ],
       "plannedCommit": "feat(api): add security headers",
       "commits": []
     },
@@ -365,9 +643,19 @@
       "title": "Deploy proposed AWS topology",
       "kind": "infra",
       "status": "planned",
+      "githubIssue": {
+        "number": 26,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/26"
+      },
       "summary": "Fill the RM-05 CDK skeleton: Fargate+ALB, RDS, S3+CloudFront. HTTPS. No Lambda.",
-      "dependsOn": ["RM-05", "RM-17", "RM-21"],
-      "introduces": ["infra/cdk/lib/"],
+      "dependsOn": [
+        "RM-05",
+        "RM-17",
+        "RM-21"
+      ],
+      "introduces": [
+        "infra/cdk/lib/"
+      ],
       "plannedCommit": "feat(infra): deploy API and SPA on AWS",
       "commits": []
     }
