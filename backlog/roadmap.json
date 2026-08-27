@@ -66,6 +66,9 @@
     ],
     "afc453c0a096332eb078dd56d04138df7f4c8686": [
       "RM-12"
+    ],
+    "e7a8d6ffa007628d5a064957ced0a1ce9c9d3b87": [
+      "RM-13"
     ]
   },
   "byIssue": {
@@ -452,7 +455,7 @@
       "commits": [
         {
           "message": "feat(api): add checkout quote endpoint",
-          "sha": ""
+          "sha": "e7a8d6ffa007628d5a064957ced0a1ce9c9d3b87"
         }
       ]
     },
@@ -462,7 +465,7 @@
       "wave": 2,
       "title": "Customers and deliveries",
       "kind": "feat",
-      "status": "planned",
+      "status": "done",
       "githubIssue": {
         "number": 14,
         "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/14"
@@ -476,7 +479,12 @@
         "apps/api/src/application/deliveries/"
       ],
       "plannedCommit": "feat(api): add customers and deliveries",
-      "commits": []
+      "commits": [
+        {
+          "message": "feat(api): add customers and deliveries",
+          "sha": ""
+        }
+      ]
     },
     {
       "id": "RM-15",

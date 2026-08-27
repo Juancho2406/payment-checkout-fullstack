@@ -124,7 +124,7 @@ Validaciones: `quantity >= 1`, producto existe, `quantity <= stock` (si no, `409
 
 ---
 
-## Customers — no implementado (`RM-14`)
+## Customers (`RM-14`)
 
 ### `POST /customers`
 
@@ -150,7 +150,7 @@ Para recuperar progreso tras refresh. **No** devuelve PAN ni tokens.
 
 ---
 
-## Deliveries — no implementado (`RM-14`)
+## Deliveries (`RM-14`)
 
 ### `POST /deliveries`
 
