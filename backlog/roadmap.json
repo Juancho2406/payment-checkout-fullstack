@@ -108,6 +108,9 @@
     ],
     "11f33ab2b69a1fb7904d4a2931bedf2c82c0b30b": [
       "RM-26"
+    ],
+    "7bbdbbeca7439511e65f7ae7793fb9c1f8390422": [
+      "RM-26"
     ]
   },
   "byIssue": {
@@ -847,6 +850,10 @@
         },
         {
           "message": "fix(infra): build SPA before cdk bootstrap",
+          "sha": "7bbdbbeca7439511e65f7ae7793fb9c1f8390422"
+        },
+        {
+          "message": "fix(infra): use available RDS Postgres 16.13",
           "sha": ""
         }
       ]
