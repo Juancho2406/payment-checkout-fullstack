@@ -1,0 +1,6 @@
+{
+  "name": "@checkout/infra",
+  "private": true,
+  "version": "0.0.0",
+  "description": "AWS CDK stacks — constructs filled when there is an image to deploy"
+}

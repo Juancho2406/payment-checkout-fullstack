@@ -1,0 +1,6 @@
+{
+  "name": "@checkout/web",
+  "private": true,
+  "version": "0.0.0",
+  "description": "React checkout SPA — app code lands in later slices"
+}

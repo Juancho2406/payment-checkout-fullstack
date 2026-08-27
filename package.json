@@ -1,0 +1,12 @@
+{
+  "name": "payment-checkout-fullstack",
+  "private": true,
+  "description": "Checkout kata: React SPA + hexagonal NestJS API + AWS CDK",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "sync:projects": "node backlog/sync-projects.mjs"
+  }
+}

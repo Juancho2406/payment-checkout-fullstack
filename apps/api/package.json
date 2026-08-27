@@ -1,0 +1,6 @@
+{
+  "name": "@checkout/api",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Hexagonal NestJS API — app code lands in later slices"
+}
