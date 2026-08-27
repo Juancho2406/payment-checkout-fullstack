@@ -25,23 +25,26 @@
     }
   },
   "byCommit": {
-    "b7fc3c48147700a1a5e15a2ee9e6841dcfd76103": [
+    "f46dd82366d5a29de73a1a209e6c71899a9c5add": [
       "RM-01"
     ],
-    "ca87d274e9ad40561708917c9503d817f2ed7650": [
+    "7f65dab27bfbc3f645de50c5fa3dffd5c9cbd37c": [
       "RM-02"
     ],
-    "df8a69262deb311f0294bc547aa628a9f7c3a204": [
+    "a5575bcb5137fea3d3620b8c29eb63c99854e396": [
       "RM-03"
     ],
-    "afeff52db1edfac9d00a3b369c1ba9d167313617": [
+    "9043e761143bc87597a8ead74d5558a6c20bb7e6": [
       "RM-04"
     ],
-    "9e251ca517ac66e34bb1e73c3a1fd16aff9b5b11": [
+    "ed657f05d6faadfa6c4223695d44f154869008a5": [
       "RM-05"
     ],
-    "5fe7cb12cc4e4681facede0a474abc5dfd4f92ca": [
+    "beb94f6a33eb71a815eaa88b11d9c74b010c0799": [
       "RM-06"
+    ],
+    "466439e64cbf7c65548d299dd0ecc45bed9d6e61": [
+      "RM-07"
     ]
   },
   "byIssue": {
@@ -59,7 +62,18 @@
     "12": "RM-12",
     "13": "RM-13",
     "14": "RM-14",
-    "15": "RM-15"
+    "15": "RM-15",
+    "16": "RM-16",
+    "17": "RM-17",
+    "18": "RM-18",
+    "19": "RM-19",
+    "20": "RM-20",
+    "21": "RM-21",
+    "22": "RM-22",
+    "23": "RM-23",
+    "24": "RM-24",
+    "25": "RM-25",
+    "26": "RM-26"
   },
   "items": [
     {
@@ -82,7 +96,7 @@
       "commits": [
         {
           "message": "chore(repo): add gitignore",
-          "sha": "b7fc3c48147700a1a5e15a2ee9e6841dcfd76103"
+          "sha": "f46dd82366d5a29de73a1a209e6c71899a9c5add"
         }
       ]
     },
@@ -113,7 +127,7 @@
       "commits": [
         {
           "message": "chore(repo): add monorepo packaging folders",
-          "sha": "ca87d274e9ad40561708917c9503d817f2ed7650"
+          "sha": "7f65dab27bfbc3f645de50c5fa3dffd5c9cbd37c"
         }
       ]
     },
@@ -139,7 +153,7 @@
       "commits": [
         {
           "message": "docs(backlog): add roadmap data to map commits to work slices",
-          "sha": "df8a69262deb311f0294bc547aa628a9f7c3a204"
+          "sha": "a5575bcb5137fea3d3620b8c29eb63c99854e396"
         }
       ]
     },
@@ -165,7 +179,7 @@
       "commits": [
         {
           "message": "docs(architecture): add draw.io of target architecture",
-          "sha": "afeff52db1edfac9d00a3b369c1ba9d167313617"
+          "sha": "9043e761143bc87597a8ead74d5558a6c20bb7e6"
         }
       ]
     },
@@ -192,7 +206,7 @@
       "commits": [
         {
           "message": "chore(infra): add proposed local compose and aws skeleton",
-          "sha": "9e251ca517ac66e34bb1e73c3a1fd16aff9b5b11"
+          "sha": "ed657f05d6faadfa6c4223695d44f154869008a5"
         }
       ]
     },
@@ -224,7 +238,7 @@
       "commits": [
         {
           "message": "chore(repo): add pnpm workspaces",
-          "sha": "5fe7cb12cc4e4681facede0a474abc5dfd4f92ca"
+          "sha": "beb94f6a33eb71a815eaa88b11d9c74b010c0799"
         }
       ]
     },
@@ -250,7 +264,7 @@
       "commits": [
         {
           "message": "docs(repo): add root README",
-          "sha": ""
+          "sha": "466439e64cbf7c65548d299dd0ecc45bed9d6e61"
         }
       ]
     },
@@ -260,7 +274,7 @@
       "wave": 1,
       "title": "Kata contract docs",
       "kind": "docs",
-      "status": "planned",
+      "status": "done",
       "githubIssue": {
         "number": 8,
         "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/8"
@@ -275,7 +289,12 @@
         "docs/api-contract.md"
       ],
       "plannedCommit": "docs(kata): add architecture, data model and API contract",
-      "commits": []
+      "commits": [
+        {
+          "message": "docs(kata): add architecture, data model and API contract",
+          "sha": ""
+        }
+      ]
     },
     {
       "id": "RM-09",
@@ -434,7 +453,10 @@
       "title": "Client card tokenization",
       "kind": "feat",
       "status": "planned",
-      "githubIssue": null,
+      "githubIssue": {
+        "number": 16,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/16"
+      },
       "summary": "Browser tokenizes with PSP public key. API never sees PAN/CVC. Port is createCharge/getChargeStatus only.",
       "dependsOn": [
         "RM-18"
@@ -452,7 +474,10 @@
       "title": "Pay orchestration (ROP)",
       "kind": "feat",
       "status": "planned",
-      "githubIssue": null,
+      "githubIssue": {
+        "number": 17,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/17"
+      },
       "summary": "POST /transactions/:id/pay with paymentToken. PSP sandbox APPROVED/DECLINED. Delivery + stock. Idempotent by reference.",
       "dependsOn": [
         "RM-15"
@@ -470,7 +495,10 @@
       "title": "SPA product page",
       "kind": "feat",
       "status": "planned",
-      "githubIssue": null,
+      "githubIssue": {
+        "number": 18,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/18"
+      },
       "summary": "React + Redux. Product, price, stock, Pay with credit card. Reads GET /products.",
       "dependsOn": [
         "RM-06",
@@ -489,7 +517,10 @@
       "title": "Card and delivery modal",
       "kind": "feat",
       "status": "planned",
-      "githubIssue": null,
+      "githubIssue": {
+        "number": 19,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/19"
+      },
       "summary": "Fake Visa/Mastercard format, Luhn, brand logos. Delivery fields. No PAN in Redux persist.",
       "dependsOn": [
         "RM-18"
@@ -507,7 +538,10 @@
       "title": "Summary backdrop",
       "kind": "feat",
       "status": "planned",
-      "githubIssue": null,
+      "githubIssue": {
+        "number": 20,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/20"
+      },
       "summary": "Material backdrop: product amount + base fee + delivery fee. Pay button. Totals from quote API.",
       "dependsOn": [
         "RM-13",
@@ -526,7 +560,10 @@
       "title": "Final status and return to product",
       "kind": "feat",
       "status": "planned",
-      "githubIssue": null,
+      "githubIssue": {
+        "number": 21,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/21"
+      },
       "summary": "Show APPROVED/DECLINED and redirect to product with updated stock.",
       "dependsOn": [
         "RM-17",
@@ -545,7 +582,10 @@
       "title": "Refresh-safe checkout state",
       "kind": "feat",
       "status": "planned",
-      "githubIssue": null,
+      "githubIssue": {
+        "number": 22,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/22"
+      },
       "summary": "Redux + localStorage for step, delivery, productId, transactionId. Never PAN/CVC.",
       "dependsOn": [
         "RM-18"
@@ -563,7 +603,10 @@
       "title": "Jest coverage above 80 percent",
       "kind": "test",
       "status": "planned",
-      "githubIssue": null,
+      "githubIssue": {
+        "number": 23,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/23"
+      },
       "summary": "Unit tests on API use cases and web validators/reducers. Gate belongs here, not on empty scaffold.",
       "dependsOn": [
         "RM-17",
@@ -583,7 +626,10 @@
       "title": "Swagger public contract",
       "kind": "docs",
       "status": "planned",
-      "githubIssue": null,
+      "githubIssue": {
+        "number": 24,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/24"
+      },
       "summary": "Public /docs (or Postman) linked from README. Kata README rubric.",
       "dependsOn": [
         "RM-17"
@@ -601,7 +647,10 @@
       "title": "HTTPS and security headers",
       "kind": "feat",
       "status": "planned",
-      "githubIssue": null,
+      "githubIssue": {
+        "number": 25,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/25"
+      },
       "summary": "Helmet, HSTS, CSP, CORS to the SPA origin. Bonus OWASP.",
       "dependsOn": [
         "RM-10"
@@ -619,7 +668,10 @@
       "title": "Deploy proposed AWS topology",
       "kind": "infra",
       "status": "planned",
-      "githubIssue": null,
+      "githubIssue": {
+        "number": 26,
+        "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/26"
+      },
       "summary": "Fill the RM-05 CDK skeleton: Fargate+ALB, RDS, S3+CloudFront. HTTPS. No Lambda.",
       "dependsOn": [
         "RM-05",
