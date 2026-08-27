@@ -20,7 +20,13 @@ export class ProductsController {
   @Get()
   async list() {
     const result = await this.listProducts.execute();
-    return { data: result.value.map(toProductResponse) };
+    if (result.ok) {
+      return { data: result.value.map(toProductResponse) };
+    }
+    throw new HttpException(
+      { error: { code: "UNEXPECTED", message: "Could not list products" } },
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
   }
 
   @Get(":id")
