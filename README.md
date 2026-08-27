@@ -2,7 +2,7 @@
 
 Kata de checkout: un producto, pago con tarjeta de prueba contra una pasarela **sandbox** (PSP; no se nombra la marca en el código). El trabajo se monta slice a slice (`RM-NN`).
 
-**Links** · Web: _pendiente_ · API / Swagger: _pendiente_ · Cobertura: _pendiente_ · [Tablero](https://github.com/users/Juancho2406/projects/3)
+**Links** · Web: `http://localhost:5173` (local) · API: `http://localhost:3000/api/v1` · Cobertura: _pendiente_ · [Tablero](https://github.com/users/Juancho2406/projects/3)
 
 ## Stack (objetivo)
 
@@ -12,7 +12,7 @@ Kata de checkout: un producto, pago con tarjeta de prueba contra una pasarela **
 - **Monorepo:** pnpm workspaces, Node 22
 - **Infra:** Docker Compose (Postgres local) · AWS CDK (ECS Fargate + ALB, RDS, S3 + CloudFront). **Sin Lambda.**
 
-Hoy hay Nest (health). Vite y Prisma **aún no**.
+Hoy hay Nest (catálogo, checkout, cobro) y la SPA de producto en Vite.
 
 ## Carpetas
 
@@ -28,10 +28,16 @@ Hoy hay Nest (health). Vite y Prisma **aún no**.
 
 ```bash
 pnpm install
+docker compose -f infra/docker-compose.yml up -d
+cp apps/api/.env.example apps/api/.env
+pnpm --filter @checkout/api prisma:migrate
+pnpm --filter @checkout/api prisma:seed
 pnpm --filter @checkout/api start
+pnpm --filter @checkout/web start
 ```
 
-`GET http://localhost:3000/api/v1/health` → `{ "status": "ok" }`. Postgres (Compose) no hace falta para health; Vite llega después.
+`GET http://localhost:3000/api/v1/health` → `{ "status": "ok" }`.
+SPA: `http://localhost:5173` (proxy `/api` → Nest).
 
 ## CI
 

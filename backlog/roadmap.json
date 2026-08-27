@@ -75,6 +75,9 @@
     ],
     "1f4b49fc4ffb0a880100f51b2ad2ff3a1303d583": [
       "RM-15"
+    ],
+    "e9e51c8ea3741df34c97c6fdeb3166d200230383": [
+      "RM-17"
     ]
   },
   "byIssue": {
@@ -562,7 +565,7 @@
       "commits": [
         {
           "message": "feat(api): orchestrate sandbox payment with ROP",
-          "sha": ""
+          "sha": "e9e51c8ea3741df34c97c6fdeb3166d200230383"
         }
       ]
     },
@@ -572,7 +575,7 @@
       "wave": 3,
       "title": "SPA product page",
       "kind": "feat",
-      "status": "planned",
+      "status": "done",
       "githubIssue": {
         "number": 18,
         "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/18"
@@ -586,7 +589,12 @@
         "apps/web/src/"
       ],
       "plannedCommit": "feat(web): add product page",
-      "commits": []
+      "commits": [
+        {
+          "message": "feat(web): add product page",
+          "sha": ""
+        }
+      ]
     },
     {
       "id": "RM-19",
