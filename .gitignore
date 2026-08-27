@@ -6,6 +6,8 @@ node_modules/
 dist/
 build/
 coverage/
+cdk.out/
+infra/cdk/cdk.out/
 
 # env & secrets
 .env

@@ -2,5 +2,19 @@
   "name": "@checkout/infra",
   "private": true,
   "version": "0.0.0",
-  "description": "AWS CDK stacks — constructs filled when there is an image to deploy"
+  "description": "AWS CDK stacks — VPC, RDS, Fargate+ALB, S3+CloudFront",
+  "scripts": {
+    "synth": "cdk synth",
+    "deploy": "cdk deploy --require-approval never"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.267.0",
+    "constructs": "^10.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.16.5",
+    "aws-cdk": "^2.1139.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
 }

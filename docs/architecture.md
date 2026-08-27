@@ -6,15 +6,15 @@ Contrato de la kata: **SPA de checkout + API hexagonal + PostgreSQL**. El dibujo
 
 ## Dos despliegues, el mismo código
 
-| | Local | AWS (propuesto) |
+| | Local | AWS |
 |---|---|---|
 | SPA | Vite en `apps/web` | CloudFront → origen S3 (`apps/web` estático) |
-| API | Nest en `apps/api` | ALB HTTPS → **ECS Fargate** (misma API hexagonal) |
-| DB | Postgres 16 en Compose (`infra/docker-compose.yml`) | RDS PostgreSQL en subred privada |
+| API | Nest en `apps/api` | CloudFront `/api/*` → ALB HTTP → **ECS Fargate** (misma API hexagonal) |
+| DB | Postgres 16 en Compose (`infra/docker-compose.yml`) | RDS PostgreSQL en subred aislada |
 | Secretos | env (`.env.example`) | Secrets Manager |
 | Logs | stdout | CloudWatch |
 
-**Sin Lambda.** La API es un proceso HTTP largo: orquesta cobro, hace polling del sandbox y escribe stock/entrega. Eso encaja en Fargate, no en un handler de un request. El esqueleto CDK (`infra/cdk`) nombra las stacks; los constructs se rellenan cuando haya imagen (`RM-26`).
+**Sin Lambda.** La API es un proceso HTTP largo: orquesta cobro, hace polling del sandbox y escribe stock/entrega. Eso encaja en Fargate, no en un handler de un request. Las stacks CDK (`infra/cdk`) despliegan esa topología desde GitHub Actions (`RM-26`).
 
 Compose **solo** levanta Postgres. Nest y Vite no se arrancan desde `infra/`.
 

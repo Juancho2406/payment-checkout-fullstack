@@ -1,0 +1,16 @@
+# Build context is the monorepo root (CDK fromAsset).
+.git
+**/.git
+**/node_modules
+**/dist
+**/coverage
+**/.env
+**/.env.*
+*.pdf
+docs
+backlog
+.github
+**/*.spec.ts
+**/*.spec.tsx
+infra/cdk/cdk.out
+infra/cdk/dist

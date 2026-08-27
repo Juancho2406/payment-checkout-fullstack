@@ -1,6 +1,7 @@
 // Kata catalog + checkout tables. Amounts are integer COP cents. No PAN/CVC.
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {

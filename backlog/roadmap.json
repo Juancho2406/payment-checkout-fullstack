@@ -102,6 +102,9 @@
     ],
     "e79a8589c89884e4002d4e1fd5fc1e2a336f4774": [
       "RM-24"
+    ],
+    "733087f9160cf4182b798183aac1f0d7edc24710": [
+      "RM-25"
     ]
   },
   "byIssue": {
@@ -807,7 +810,7 @@
       "commits": [
         {
           "message": "feat(api): add security headers",
-          "sha": ""
+          "sha": "733087f9160cf4182b798183aac1f0d7edc24710"
         }
       ]
     },
@@ -817,7 +820,7 @@
       "wave": 4,
       "title": "Deploy proposed AWS topology",
       "kind": "infra",
-      "status": "planned",
+      "status": "done",
       "githubIssue": {
         "number": 26,
         "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/26"
@@ -829,10 +832,17 @@
         "RM-21"
       ],
       "introduces": [
-        "infra/cdk/lib/"
+        "infra/cdk/lib/",
+        "apps/api/Dockerfile",
+        ".github/workflows/ci.yml"
       ],
       "plannedCommit": "feat(infra): deploy API and SPA on AWS",
-      "commits": []
+      "commits": [
+        {
+          "message": "feat(infra): deploy API and SPA on AWS",
+          "sha": ""
+        }
+      ]
     }
   ]
 }
