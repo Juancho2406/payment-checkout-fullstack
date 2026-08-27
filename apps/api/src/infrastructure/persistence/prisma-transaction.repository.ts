@@ -7,12 +7,15 @@ import {
   TRANSACTION_STATUS_DECLINED,
   TRANSACTION_STATUS_ERROR,
   TRANSACTION_STATUS_PENDING,
+  type AttachPspChargeInput,
   type CheckoutTransaction,
   type CreatePendingOutcome,
+  type FinalizePayInput,
   type NewPendingTransaction,
   type TransactionRepository,
   type TransactionStatus,
 } from "../../domain/transaction";
+import { DELIVERY_STATUS_ASSIGNED } from "../../domain/delivery";
 import { PrismaService } from "./prisma.service";
 
 const UUID_RE =
@@ -44,6 +47,9 @@ export function toCheckoutTransaction(
     deliveryFeeCents: row.deliveryFeeCents,
     totalCents: row.totalCents,
     currency: PRODUCT_CURRENCY,
+    pspTransactionId: row.pspTransactionId,
+    cardBrand: row.cardBrand,
+    cardLast4: row.cardLast4,
   };
 }
 
@@ -138,5 +144,56 @@ export class PrismaTransactionRepository implements TransactionRepository {
       }
       throw error;
     }
+  }
+
+  async attachPspCharge(
+    id: string,
+    charge: AttachPspChargeInput,
+  ): Promise<CheckoutTransaction | null> {
+    if (!UUID_RE.test(id)) {
+      return null;
+    }
+    const row = await this.prisma.transaction.update({
+      where: { id },
+      data: {
+        pspTransactionId: charge.pspTransactionId,
+        cardBrand: charge.cardBrand,
+        cardLast4: charge.cardLast4,
+      },
+    });
+    return toCheckoutTransaction(row);
+  }
+
+  async finalizePay(input: FinalizePayInput): Promise<CheckoutTransaction | null> {
+    if (!UUID_RE.test(input.id)) {
+      return null;
+    }
+    const row = await this.prisma.$transaction(async (tx) => {
+      if (input.status === TRANSACTION_STATUS_APPROVED) {
+        await tx.delivery.updateMany({
+          where: { id: input.deliveryId },
+          data: {
+            status: DELIVERY_STATUS_ASSIGNED,
+            transactionId: input.id,
+          },
+        });
+      }
+      if (input.status === TRANSACTION_STATUS_DECLINED) {
+        await tx.product.updateMany({
+          where: { id: input.productId },
+          data: { stock: { increment: input.quantity } },
+        });
+      }
+      return tx.transaction.update({
+        where: { id: input.id },
+        data: {
+          status: input.status,
+          pspTransactionId: input.pspTransactionId,
+          cardBrand: input.cardBrand,
+          cardLast4: input.cardLast4,
+        },
+      });
+    });
+    return toCheckoutTransaction(row);
   }
 }

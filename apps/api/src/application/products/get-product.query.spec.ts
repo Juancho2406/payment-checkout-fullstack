@@ -24,6 +24,10 @@ class FakeProductRepository implements ProductRepository {
   async reserveStock(): Promise<boolean> {
     return true;
   }
+
+  async releaseStock(): Promise<boolean> {
+    return true;
+  }
 }
 
 describe("GetProductQuery", () => {

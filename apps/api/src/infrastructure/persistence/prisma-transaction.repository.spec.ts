@@ -42,6 +42,9 @@ describe("toCheckoutTransaction", () => {
       deliveryFeeCents: 800000,
       totalCents: 21200000,
       currency: "COP",
+      pspTransactionId: null,
+      cardBrand: null,
+      cardLast4: null,
     });
   });
 

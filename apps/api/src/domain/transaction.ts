@@ -25,7 +25,25 @@ export type CheckoutTransaction = {
   readonly deliveryFeeCents: number;
   readonly totalCents: number;
   readonly currency: typeof PRODUCT_CURRENCY;
+  readonly pspTransactionId: string | null;
+  readonly cardBrand: string | null;
+  readonly cardLast4: string | null;
 };
+
+export const EMPTY_PSP_DETAILS = {
+  pspTransactionId: null,
+  cardBrand: null,
+  cardLast4: null,
+} as const;
+
+export function isPaidTerminal(
+  status: TransactionStatus,
+): status is typeof TRANSACTION_STATUS_APPROVED | typeof TRANSACTION_STATUS_DECLINED {
+  return (
+    status === TRANSACTION_STATUS_APPROVED ||
+    status === TRANSACTION_STATUS_DECLINED
+  );
+}
 
 export type TransactionNotFoundError = {
   readonly code: "NOT_FOUND";
@@ -114,9 +132,35 @@ export type CreatePendingOutcome =
 
 export const TRANSACTION_REPOSITORY = Symbol("TransactionRepository");
 
+export type AttachPspChargeInput = {
+  readonly pspTransactionId: string;
+  readonly cardBrand: string | null;
+  readonly cardLast4: string | null;
+};
+
+export type FinalizePayInput = {
+  readonly id: string;
+  readonly status:
+    | typeof TRANSACTION_STATUS_APPROVED
+    | typeof TRANSACTION_STATUS_DECLINED
+    | typeof TRANSACTION_STATUS_ERROR;
+  readonly pspTransactionId: string | null;
+  readonly cardBrand: string | null;
+  readonly cardLast4: string | null;
+  readonly productId: string;
+  readonly quantity: number;
+  readonly deliveryId: string;
+};
+
 export interface TransactionRepository {
   findById(id: string): Promise<CheckoutTransaction | null>;
   findByReference(reference: string): Promise<CheckoutTransaction | null>;
   /** Inserts PENDING and reserves stock in one step. */
   createPending(input: NewPendingTransaction): Promise<CreatePendingOutcome>;
+  attachPspCharge(
+    id: string,
+    charge: AttachPspChargeInput,
+  ): Promise<CheckoutTransaction | null>;
+  /** Persists terminal/ERROR status; assigns delivery on APPROVED; releases stock on DECLINED. */
+  finalizePay(input: FinalizePayInput): Promise<CheckoutTransaction | null>;
 }

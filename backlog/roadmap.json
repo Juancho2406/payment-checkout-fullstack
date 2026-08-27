@@ -72,6 +72,9 @@
     ],
     "b8698731726ff346fdf55afa5c161b88e4cb37e4": [
       "RM-14"
+    ],
+    "1f4b49fc4ffb0a880100f51b2ad2ff3a1303d583": [
+      "RM-15"
     ]
   },
   "byIssue": {
@@ -512,7 +515,7 @@
       "commits": [
         {
           "message": "feat(api): create PENDING transactions",
-          "sha": ""
+          "sha": "1f4b49fc4ffb0a880100f51b2ad2ff3a1303d583"
         }
       ]
     },
@@ -543,7 +546,7 @@
       "wave": 2,
       "title": "Pay orchestration (ROP)",
       "kind": "feat",
-      "status": "planned",
+      "status": "done",
       "githubIssue": {
         "number": 17,
         "url": "https://github.com/Juancho2406/payment-checkout-fullstack/issues/17"
@@ -556,7 +559,12 @@
         "apps/api/src/application/transactions/pay-transaction.use-case.ts"
       ],
       "plannedCommit": "feat(api): orchestrate sandbox payment with ROP",
-      "commits": []
+      "commits": [
+        {
+          "message": "feat(api): orchestrate sandbox payment with ROP",
+          "sha": ""
+        }
+      ]
     },
     {
       "id": "RM-18",

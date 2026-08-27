@@ -56,4 +56,18 @@ describe("PrismaProductRepository", () => {
     await expect(repository.reserveStock("not-a-uuid", 1)).resolves.toBe(false);
     expect(prisma.product.updateMany).not.toHaveBeenCalled();
   });
+
+  it("returns false for releaseStock with an invalid uuid without querying", async () => {
+    const prisma = {
+      product: {
+        updateMany: jest.fn(),
+      },
+    };
+    const repository = new PrismaProductRepository(
+      prisma as unknown as PrismaService,
+    );
+
+    await expect(repository.releaseStock("not-a-uuid", 1)).resolves.toBe(false);
+    expect(prisma.product.updateMany).not.toHaveBeenCalled();
+  });
 });

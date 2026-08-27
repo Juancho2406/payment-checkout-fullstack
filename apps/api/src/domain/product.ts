@@ -28,4 +28,6 @@ export interface ProductRepository {
   findById(id: string): Promise<Product | null>;
   /** Atomic decrement. `false` if the row is missing or stock is insufficient. */
   reserveStock(id: string, quantity: number): Promise<boolean>;
+  /** Returns reserved units after a declined or failed charge. */
+  releaseStock(id: string, quantity: number): Promise<boolean>;
 }

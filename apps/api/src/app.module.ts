@@ -11,6 +11,7 @@ import { GetProductQuery } from "./application/products/get-product.query";
 import { ListProductsQuery } from "./application/products/list-products.query";
 import { CreatePendingTransactionQuery } from "./application/transactions/create-pending-transaction.query";
 import { GetTransactionQuery } from "./application/transactions/get-transaction.query";
+import { PayTransactionQuery } from "./application/transactions/pay-transaction.query";
 import {
   CUSTOMER_REPOSITORY,
   type CustomerRepository,
@@ -19,6 +20,13 @@ import {
   DELIVERY_REPOSITORY,
   type DeliveryRepository,
 } from "./domain/delivery";
+import {
+  defaultPaymentSleep,
+  PAYMENT_GATEWAY,
+  PAYMENT_SETTINGS,
+  type PaymentGateway,
+  type PaymentSettings,
+} from "./domain/payment";
 import {
   PRODUCT_REPOSITORY,
   type ProductRepository,
@@ -38,6 +46,7 @@ import { PrismaCustomerRepository } from "./infrastructure/persistence/prisma-cu
 import { PrismaDeliveryRepository } from "./infrastructure/persistence/prisma-delivery.repository";
 import { PrismaProductRepository } from "./infrastructure/persistence/prisma-product.repository";
 import { PrismaTransactionRepository } from "./infrastructure/persistence/prisma-transaction.repository";
+import { HttpPaymentGateway } from "./infrastructure/psp/http-payment.gateway";
 
 @Module({
   imports: [PrismaModule],
@@ -69,6 +78,23 @@ import { PrismaTransactionRepository } from "./infrastructure/persistence/prisma
     {
       provide: TRANSACTION_REPOSITORY,
       useClass: PrismaTransactionRepository,
+    },
+    {
+      provide: PAYMENT_SETTINGS,
+      useFactory: (): PaymentSettings => ({
+        integritySecret: process.env.PSP_INTEGRITY_SECRET ?? "test-integrity-secret",
+        pollIntervalMs: Number(process.env.PSP_POLL_INTERVAL_MS ?? 1000),
+        pollMaxAttempts: Number(process.env.PSP_POLL_MAX_ATTEMPTS ?? 15),
+        sleep: defaultPaymentSleep,
+      }),
+    },
+    {
+      provide: PAYMENT_GATEWAY,
+      useFactory: () =>
+        new HttpPaymentGateway({
+          baseUrl: process.env.PSP_BASE_URL ?? "",
+          privateKey: process.env.PSP_PRIVATE_KEY ?? "",
+        }),
     },
     {
       provide: ListProductsQuery,
@@ -133,6 +159,22 @@ import { PrismaTransactionRepository } from "./infrastructure/persistence/prisma
       useFactory: (transactions: TransactionRepository) =>
         new GetTransactionQuery(transactions),
       inject: [TRANSACTION_REPOSITORY],
+    },
+    {
+      provide: PayTransactionQuery,
+      useFactory: (
+        transactions: TransactionRepository,
+        customers: CustomerRepository,
+        gateway: PaymentGateway,
+        settings: PaymentSettings,
+      ) =>
+        new PayTransactionQuery(transactions, customers, gateway, settings),
+      inject: [
+        TRANSACTION_REPOSITORY,
+        CUSTOMER_REPOSITORY,
+        PAYMENT_GATEWAY,
+        PAYMENT_SETTINGS,
+      ],
     },
   ],
 })

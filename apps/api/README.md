@@ -13,3 +13,5 @@ pnpm --filter @checkout/api start
 `GET http://localhost:3000/api/v1/health` → `{ "status": "ok" }`.
 
 `GET /api/v1/products` lists the seeded catalog (`{ "data": [ { id, name, description, priceCents, currency, stock, imageUrl } ] }`). `GET /api/v1/products/:id` returns one product or `{ "error": { "code": "NOT_FOUND", "message": "…" } }`.
+
+`POST /api/v1/transactions/:id/pay` charges the sandbox PSP (never PAN/CVC). Set `PSP_*` in `.env` for a live sandbox; unit tests use a fake gateway.

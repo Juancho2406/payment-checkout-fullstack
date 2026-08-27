@@ -20,8 +20,11 @@ import { PRODUCT_REPOSITORY } from "../../domain/product";
 import {
   TRANSACTION_REPOSITORY,
   TRANSACTION_STATUS_PENDING,
+  EMPTY_PSP_DETAILS,
+  type AttachPspChargeInput,
   type CheckoutTransaction,
   type CreatePendingOutcome,
+  type FinalizePayInput,
   type NewPendingTransaction,
   type TransactionRepository,
 } from "../../domain/transaction";
@@ -71,6 +74,16 @@ class FakeProductRepository implements ProductRepository {
       return false;
     }
     this.catalog[index] = { ...product, stock: product.stock - quantity };
+    return true;
+  }
+
+  async releaseStock(id: string, quantity: number): Promise<boolean> {
+    const index = this.catalog.findIndex((product) => product.id === id);
+    const product = this.catalog[index];
+    if (!product || quantity < 1) {
+      return false;
+    }
+    this.catalog[index] = { ...product, stock: product.stock + quantity };
     return true;
   }
 }
@@ -135,10 +148,43 @@ class FakeTransactionRepository implements TransactionRepository {
     const transaction: CheckoutTransaction = {
       id: randomUUID(),
       status: TRANSACTION_STATUS_PENDING,
+      ...EMPTY_PSP_DETAILS,
       ...input,
     };
     this.rows.push(transaction);
     return { kind: "created", transaction };
+  }
+
+  async attachPspCharge(
+    id: string,
+    charge: AttachPspChargeInput,
+  ): Promise<CheckoutTransaction | null> {
+    const index = this.rows.findIndex((row) => row.id === id);
+    if (index < 0) {
+      return null;
+    }
+    const updated: CheckoutTransaction = { ...this.rows[index], ...charge };
+    this.rows[index] = updated;
+    return updated;
+  }
+
+  async finalizePay(input: FinalizePayInput): Promise<CheckoutTransaction | null> {
+    const index = this.rows.findIndex((row) => row.id === input.id);
+    if (index < 0) {
+      return null;
+    }
+    if (input.status === "DECLINED") {
+      await this.products.releaseStock(input.productId, input.quantity);
+    }
+    const updated: CheckoutTransaction = {
+      ...this.rows[index],
+      status: input.status,
+      pspTransactionId: input.pspTransactionId,
+      cardBrand: input.cardBrand,
+      cardLast4: input.cardLast4,
+    };
+    this.rows[index] = updated;
+    return updated;
   }
 }
 

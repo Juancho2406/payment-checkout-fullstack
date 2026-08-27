@@ -13,7 +13,7 @@ Autenticación de usuario: no hay. La API es de un checkout anónimo. Las llaves
 | Base local | `http://localhost:<api-port>/api/v1` |
 | Base AWS | `https://<alb>/api/v1` |
 | Errores | `{ "error": { "code": "STOCK_UNAVAILABLE", "message": "…" } }` |
-| Idempotencia | `reference` única en transacciones; `POST …/pay` repetido devuelve el estado ya persistido |
+| Idempotencia | `reference` única en transacciones; `POST …/pay` repetido sobre `APPROVED`/`DECLINED` **200** con el recurso persistido (no re-cobra) |
 
 Códigos de error de dominio (ROP → HTTP):
 
@@ -176,7 +176,7 @@ Dirección de envío. Obligatoria **antes** de `pay` (la kata asigna la entrega 
 
 ---
 
-## Transactions (`RM-15`; `pay` en `RM-17`)
+## Transactions (`RM-15`, `RM-17`)
 
 ### `POST /transactions` — `RM-15`
 

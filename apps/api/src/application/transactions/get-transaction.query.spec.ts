@@ -1,6 +1,7 @@
 import { GetTransactionQuery } from "./get-transaction.query";
 import {
   TRANSACTION_STATUS_PENDING,
+  EMPTY_PSP_DETAILS,
   type CheckoutTransaction,
   type TransactionRepository,
 } from "../../domain/transaction";
@@ -18,6 +19,7 @@ const pending: CheckoutTransaction = {
   deliveryFeeCents: 800000,
   totalCents: 21200000,
   currency: "COP",
+  ...EMPTY_PSP_DETAILS,
 };
 
 class FakeTransactionRepository implements TransactionRepository {
@@ -32,6 +34,14 @@ class FakeTransactionRepository implements TransactionRepository {
   }
 
   async createPending(): Promise<never> {
+    throw new Error("not used");
+  }
+
+  async attachPspCharge(): Promise<never> {
+    throw new Error("not used");
+  }
+
+  async finalizePay(): Promise<never> {
     throw new Error("not used");
   }
 }

@@ -12,6 +12,7 @@ import {
 import type { Product, ProductRepository } from "../../domain/product";
 import {
   TRANSACTION_STATUS_PENDING,
+  EMPTY_PSP_DETAILS,
   type CheckoutTransaction,
   type CreatePendingOutcome,
   type NewPendingTransaction,
@@ -57,6 +58,10 @@ class FakeProductRepository implements ProductRepository {
   }
 
   async reserveStock(): Promise<boolean> {
+    return true;
+  }
+
+  async releaseStock(): Promise<boolean> {
     return true;
   }
 }
@@ -116,10 +121,19 @@ class FakeTransactionRepository implements TransactionRepository {
     const transaction: CheckoutTransaction = {
       id: randomUUID(),
       status: TRANSACTION_STATUS_PENDING,
+      ...EMPTY_PSP_DETAILS,
       ...input,
     };
     this.rows.push(transaction);
     return { kind: "created", transaction };
+  }
+
+  async attachPspCharge(): Promise<CheckoutTransaction | null> {
+    throw new Error("not used");
+  }
+
+  async finalizePay(): Promise<CheckoutTransaction | null> {
+    throw new Error("not used");
   }
 }
 
@@ -204,6 +218,7 @@ describe("CreatePendingTransactionQuery", () => {
       deliveryFeeCents: DELIVERY_FEE_CENTS,
       totalCents: 21200000,
       currency: "COP",
+      ...EMPTY_PSP_DETAILS,
     });
 
     const result = await create.execute({
