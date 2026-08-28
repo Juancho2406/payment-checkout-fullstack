@@ -1,10 +1,10 @@
-# Modelo de datos (objetivo)
+# Modelo de datos
 
-Cuatro entidades de negocio que pide la kata: **producto**, **cliente**, **transacción** y **entrega**. Prisma **aún no está**; esto es el modelo al que debe llegar `RM-11`. Montos siempre en **centavos enteros** (`COP`).
+Cuatro entidades de negocio que pide la kata: **producto**, **cliente**, **transacción** y **entrega**. Fuente de verdad: `apps/api/prisma/schema.prisma` (PostgreSQL, UUID, montos en **centavos enteros COP**). Local: Compose. AWS: RDS.
 
 El token de tarjeta y los tokens de aceptación **no** son tablas. Viven en el request de pago y se descartan.
 
-## Diagrama (objetivo)
+## Diagrama
 
 ```mermaid
 erDiagram
@@ -20,17 +20,21 @@ erDiagram
     int priceCents
     int stock
     string imageUrl
+    datetime createdAt
+    datetime updatedAt
   }
   CUSTOMER {
     uuid id PK
     string fullName
-    string email
+    string email UK
     string phone
+    datetime createdAt
+    datetime updatedAt
   }
   TRANSACTION {
     uuid id PK
     string reference UK
-    string status
+    enum status
     uuid productId FK
     uuid customerId FK
     uuid deliveryId FK "nullable hasta APPROVED"
@@ -43,43 +47,59 @@ erDiagram
     string pspTransactionId
     string cardBrand
     string cardLast4
+    datetime createdAt
+    datetime updatedAt
   }
   DELIVERY {
     uuid id PK
     uuid customerId FK
-    uuid transactionId FK
+    uuid transactionId FK "nullable hasta APPROVED"
     string address
     string city
     string region
     string postalCode
     string status
+    datetime createdAt
+    datetime updatedAt
   }
 ```
+
+Tablas Prisma: `products`, `customers`, `transactions`, `deliveries`. `Transaction.status` es el enum `PENDING | APPROVED | DECLINED | ERROR`.
+
+Hay **dos FKs** entre transacción y entrega:
+
+- `deliveries.transactionId` — la dirección “pertenece” a esa compra (se rellena al asignar).
+- `transactions.deliveryId` — la transacción apunta a la entrega **solo** en `APPROVED` (única).
 
 ## Entidades
 
 ### Product
 
-Catálogo seed (dummy). **No** hay `POST /products`.
+Catálogo dummy. **No** hay `POST /products`. El seed (`apps/api/prisma/seed.ts`) upserta dos ítems:
+
+| Nombre | `priceCents` | `stock` inicial |
+|---|---|---|
+| Auriculares inalámbricos | 12_990_000 | 8 |
+| Teclado mecánico | 24_990_000 | 4 |
+
+Fotos en `apps/web/public/products/` (`imageUrl` tipo `/products/headphones.jpg`).
 
 | Campo | Notas |
 |---|---|
 | `priceCents` | Precio unitario. El total de línea se calcula en servidor (`quantity * priceCents`). |
 | `stock` | Unidades disponibles. Al crear `PENDING` se **reserva**; al `APPROVED` se confirma el descuento; al `DECLINED` / timeout se **libera**. |
 
-Un producto basta para la kata; el seed puede traer 1–3.
-
 ### Customer
 
-Quién compra. Email y teléfono se validan (email RFC, teléfono CO). No es un usuario autenticado: se persiste para la entrega y para recuperar progreso tras un refresh (`GET /customers/:id`).
+Quién compra. `email` es único. No es un usuario autenticado: se persiste para la entrega y para recuperar progreso tras un refresh (`GET /customers/:id`).
 
 ### Delivery
 
-Dirección de envío. Se captura **antes** del cobro (junto con la tarjeta, en el modal) y se persiste ligada al cliente. La **asignación** al producto (vincular `deliveryId` en la transacción, marcar `assigned`) ocurre **solo** si el PSP responde `APPROVED`. Si el pago falla, la fila de dirección puede existir; no hay entrega que cumplir.
+Dirección de envío. Se captura **antes** del cobro (junto con la tarjeta, en el modal) con `status = draft`. La **asignación** (`status = assigned`, `transaction.deliveryId` + `delivery.transactionId`) ocurre **solo** si el PSP responde `APPROVED`. Si el pago falla, la fila de dirección puede existir; no hay entrega que cumplir.
 
 ### Transaction (pago)
 
-Máquina de estados. `reference` es nuestra idempotencia hacia el PSP (única, ≤ 255 chars).
+Máquina de estados. `reference` es nuestra idempotencia hacia el PSP (única, ≤ 255 chars). `currency` default `COP`.
 
 | `status` | Significa |
 |---|---|
@@ -88,10 +108,10 @@ Máquina de estados. `reference` es nuestra idempotencia hacia el PSP (única, �
 | `DECLINED` | PSP rechazó; stock liberado; sin entrega |
 | `ERROR` | Timeout / error de infraestructura; reintentable sin doble cobro |
 
-Fees (fijos en servidor; el front no los manda como fuente de verdad):
+Fees fijos en servidor (`apps/api/src/domain/checkout.ts`); el front no los manda como fuente de verdad:
 
-- **Base fee:** siempre (p. ej. monto fijo en centavos o un % del producto).
-- **Delivery fee:** siempre en este checkout (p. ej. monto fijo; más adelante podría variar por ciudad).
+- **Base fee:** `500_000` centavos (siempre).
+- **Delivery fee:** `800_000` centavos (siempre en este checkout).
 
 `totalCents = productAmountCents + baseFeeCents + deliveryFeeCents`. Eso es lo que se firma y se envía al PSP como `amount_in_cents`.
 

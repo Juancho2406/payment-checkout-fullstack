@@ -49,9 +49,9 @@ GET /api/v1/health
 
 ---
 
-## Products — no implementado (`RM-12`)
+## Products
 
-No hay `POST /products`. El catálogo sale del seed (`RM-11`).
+No hay `POST /products`. El catálogo sale del seed Prisma.
 
 ### `GET /products`
 

@@ -94,4 +94,4 @@ El front **no** inventa el total. `POST /checkout/quote` recalcula producto + ba
 
 - No hay Widget/Checkout embebido del PSP: la kata pide **nuestro** modal y **nuestra** API.
 - No hay Lambda, API Gateway ni DynamoDB en la propuesta (aunque el PDF los liste como opciones).
-- No hay endpoint para crear productos: seed dummy (`RM-11`).
+- No hay endpoint para crear productos: el catálogo sale del seed Prisma.

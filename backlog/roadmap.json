@@ -114,6 +114,9 @@
     ],
     "3f083e85919e1086de4a75e112e8974b24adc7ac": [
       "RM-26"
+    ],
+    "2ae113b2cac9dcb444f2fdb3a7c1d71dbc455013": [
+      "RM-26"
     ]
   },
   "byIssue": {
@@ -366,6 +369,10 @@
         {
           "message": "docs(kata): add architecture, data model and API contract",
           "sha": "c00ea48088cf72a450837814c7382eb5f17ba143"
+        },
+        {
+          "message": "docs(kata): document implemented Prisma data model",
+          "sha": ""
         }
       ]
     },
@@ -861,7 +868,7 @@
         },
         {
           "message": "docs(readme): add live CloudFront URLs",
-          "sha": ""
+          "sha": "2ae113b2cac9dcb444f2fdb3a7c1d71dbc455013"
         }
       ]
     }

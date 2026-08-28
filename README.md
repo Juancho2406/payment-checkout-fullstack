@@ -14,6 +14,8 @@ En `main`, GitHub Actions despliega a AWS (OIDC) en este orden: red → RDS → 
 - **Monorepo:** pnpm workspaces, Node 22
 - **Infra:** Docker Compose (Postgres local) · AWS CDK (ECS Fargate + ALB, RDS, S3 + CloudFront). **Sin Lambda.** HTTPS en CloudFront; el ALB queda HTTP detrás del mismo host (`/api/*`).
 
+Modelo de datos (producto, cliente, transacción, entrega; sin PAN): [`docs/data-model.md`](docs/data-model.md). Esquema Prisma: `apps/api/prisma/schema.prisma`.
+
 Hoy hay Nest (catálogo, checkout, cobro) y la SPA de producto en Vite.
 
 ## Carpetas
@@ -23,7 +25,7 @@ Hoy hay Nest (catálogo, checkout, cobro) y la SPA de producto en Vite.
 | `apps/api` | API HTTP (workspace `@checkout/api`) |
 | `apps/web` | SPA de checkout (workspace `@checkout/web`) |
 | `infra` | Compose + CDK (`infra/cdk` = `@checkout/infra`) |
-| `docs` | Contrato de la kata. Topología: [`docs/architecture.drawio`](docs/architecture.drawio) |
+| `docs` | Contrato de la kata. Topología: [`docs/architecture.drawio`](docs/architecture.drawio). Modelo: [`docs/data-model.md`](docs/data-model.md) |
 | `backlog` | `roadmap.json` — fuente de verdad de los slices |
 
 ## Cómo correrlo (hoy)
