@@ -120,6 +120,9 @@
     ],
     "49ca2653c3e3dea04a253fb1a037219197c2067f": [
       "RM-08"
+    ],
+    "d5b4b198ee180250cbeb16e8063ac9b2704f019e": [
+      "RM-18"
     ]
   },
   "byIssue": {
@@ -647,6 +650,10 @@
         },
         {
           "message": "fix(web): render the full product catalog",
+          "sha": "d5b4b198ee180250cbeb16e8063ac9b2704f019e"
+        },
+        {
+          "message": "fix(web): copy catalog into a mutable Redux draft",
           "sha": ""
         }
       ]

@@ -3,7 +3,7 @@ import { fetchCatalog, type CatalogProduct } from "../../lib/api";
 
 export type ProductState = {
   status: "idle" | "loading" | "succeeded" | "failed";
-  items: readonly CatalogProduct[];
+  items: CatalogProduct[];
   item: CatalogProduct | null;
   error: string | null;
 };
@@ -50,7 +50,7 @@ const productSlice = createSlice({
       })
       .addCase(loadCatalog.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.items = action.payload;
+        state.items = [...action.payload];
         state.item = pickSelected(action.payload, state.item?.id ?? null);
       })
       .addCase(loadCatalog.rejected, (state, action) => {
