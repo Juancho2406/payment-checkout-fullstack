@@ -1,0 +1,104 @@
+name: Deploy IaC
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "infra/cdk/**"
+      - ".github/workflows/deploy-iac.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: payment-checkout-aws
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect CDK slices
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            platform:
+              - 'infra/cdk/lib/network-stack.ts'
+              - 'infra/cdk/lib/db-stack.ts'
+              - 'infra/cdk/lib/imported-platform.ts'
+              - 'infra/cdk/bin/app.ts'
+              - 'infra/cdk/cdk.json'
+              - 'infra/cdk/package.json'
+            api_stack:
+              - 'infra/cdk/lib/api-stack.ts'
+              - 'infra/cdk/lib/imported-platform.ts'
+              - 'infra/cdk/bin/app.ts'
+            web_stack:
+              - 'infra/cdk/lib/web-stack.ts'
+              - 'infra/cdk/bin/app.ts'
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup-workspace
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-duration-seconds: 3600
+
+      - name: CDK bootstrap
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.platform == 'true' || steps.filter.outputs.api_stack == 'true' || steps.filter.outputs.web_stack == 'true'
+        working-directory: infra/cdk
+        run: pnpm exec cdk bootstrap
+
+      - name: Deploy platform (VPC + RDS)
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.platform == 'true'
+        working-directory: infra/cdk
+        run: pnpm exec cdk deploy CheckoutNetwork CheckoutDb -c target=platform --exclusively --require-approval never
+
+      - name: Upsert PSP secret in Secrets Manager
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.api_stack == 'true'
+        env:
+          PSP_BASE_URL: ${{ secrets.PSP_BASE_URL }}
+          PSP_PRIVATE_KEY: ${{ secrets.PSP_PRIVATE_KEY }}
+          PSP_INTEGRITY_SECRET: ${{ secrets.PSP_INTEGRITY_SECRET }}
+        run: python3 .github/scripts/upsert-psp-secret.py
+
+      - name: Deploy API stack definition
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.api_stack == 'true'
+        working-directory: infra/cdk
+        run: pnpm exec cdk deploy CheckoutApi -c target=api --exclusively --require-approval never
+
+      - name: Wait for API targets to become healthy
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.api_stack == 'true'
+        run: bash .github/scripts/wait-api-targets.sh
+
+      - name: Build SPA (same-origin /api/v1 via CloudFront)
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.web_stack == 'true'
+        env:
+          VITE_API_BASE_URL: /api/v1
+          VITE_PSP_BASE_URL: ${{ secrets.VITE_PSP_BASE_URL }}
+          VITE_PSP_PUBLIC_KEY: ${{ secrets.VITE_PSP_PUBLIC_KEY }}
+        run: pnpm --filter @checkout/web build
+
+      - name: Deploy web stack definition
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.web_stack == 'true'
+        working-directory: infra/cdk
+        run: pnpm exec cdk deploy CheckoutWeb -c target=web --exclusively --require-approval never
+
+      - name: Wait for HTTPS health on CloudFront
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.web_stack == 'true'
+        run: bash .github/scripts/wait-cloudfront.sh

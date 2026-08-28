@@ -1,0 +1,57 @@
+name: Deploy web
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/web/**"
+      - ".github/workflows/deploy-web.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: payment-checkout-aws
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup-workspace
+
+      - name: Test and typecheck SPA
+        run: |
+          pnpm --filter @checkout/web exec tsc --noEmit
+          pnpm --filter @checkout/web test
+
+      - name: Build SPA (same-origin /api/v1 via CloudFront)
+        env:
+          VITE_API_BASE_URL: /api/v1
+          VITE_PSP_BASE_URL: ${{ secrets.VITE_PSP_BASE_URL }}
+          VITE_PSP_PUBLIC_KEY: ${{ secrets.VITE_PSP_PUBLIC_KEY }}
+        run: pnpm --filter @checkout/web build
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-duration-seconds: 3600
+
+      - name: Deploy web (S3 + CloudFront)
+        working-directory: infra/cdk
+        run: pnpm exec cdk deploy CheckoutWeb -c target=web --exclusively --require-approval never
+
+      - name: Wait for HTTPS health on CloudFront
+        run: bash .github/scripts/wait-cloudfront.sh

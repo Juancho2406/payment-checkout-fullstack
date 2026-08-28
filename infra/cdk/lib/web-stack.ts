@@ -2,13 +2,12 @@ import * as path from "node:path";
 import * as cdk from "aws-cdk-lib";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
-import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import type { Construct } from "constructs";
 
 export type WebStackProps = cdk.StackProps & {
-  readonly loadBalancer: elbv2.ILoadBalancerV2;
+  readonly apiOriginHostname: string;
 };
 
 /**
@@ -32,7 +31,7 @@ export class WebStack extends cdk.Stack {
       autoDeleteObjects: true,
     });
 
-    const apiOrigin = new origins.LoadBalancerV2Origin(props.loadBalancer, {
+    const apiOrigin = new origins.HttpOrigin(props.apiOriginHostname, {
       protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY,
       httpPort: 80,
       readTimeout: cdk.Duration.seconds(60),

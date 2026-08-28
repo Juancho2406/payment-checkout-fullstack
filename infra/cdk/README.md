@@ -1,11 +1,20 @@
 # infra/cdk
 
-AWS side of `docs/architecture.drawio`. GitHub Actions on `main` deploys in order:
+AWS side of `docs/architecture.drawio`. GitHub Actions on `main` deploys **only the slice that changed**:
 
-`CheckoutNetwork` → pause → `CheckoutDb` (RDS) → pause → `CheckoutApi` (Fargate + ALB) → health wait → `CheckoutWeb` (S3 + CloudFront) → HTTPS health wait.
+| Workflow | Paths | CDK |
+|---|---|---|
+| `deploy-iac.yml` | `infra/cdk/**` | `target=platform` (VPC+RDS), and API/web stacks only if those templates changed |
+| `deploy-api.yml` | `apps/api/**` | `target=api` — rebuilds the Fargate image, does not touch the SPA |
+| `deploy-web.yml` | `apps/web/**` | `target=web` — uploads S3/CloudFront, does not rebuild the API image |
+
+`cdk deploy -c target=…` synthesizes **only that slice**, so a CSS change does not docker-build Nest, and a use-case change does not need `apps/web/dist`.
+
+Cross-stack wiring uses CloudFormation exports (`CheckoutVpcId`, `CheckoutApiAlbDns`, …). The first time those outputs land, `deploy-iac` updates Network/Db/Api; later app pushes import them.
 
 ```
-bin/app.ts              wiring: Network → Db → Api → Web
+bin/app.ts              wiring + `-c target`
+lib/imported-platform.ts  CFN export names + imports
 lib/network-stack.ts    VPC, public subnets (ALB + Fargate), isolated subnets (RDS), no NAT
 lib/db-stack.ts         RDS PostgreSQL + Secrets Manager
 lib/api-stack.ts        ECS Fargate + ALB  (not Lambda)
@@ -14,7 +23,7 @@ lib/web-stack.ts        S3 + CloudFront HTTPS; `/api/*` and `/docs*` → ALB
 
 HTTPS is the CloudFront default certificate. The ALB stays HTTP; the SPA calls `/api/v1` on the same CloudFront host.
 
-PSP keys are upserted to Secrets Manager (`checkout/psp`) from GitHub Secrets **before** `cdk deploy`. They never go into CloudFormation parameters.
+PSP keys are upserted to Secrets Manager (`checkout/psp`) from GitHub Secrets on API deploys. They never go into CloudFormation parameters.
 
 ## AWS auth (GitHub Actions)
 

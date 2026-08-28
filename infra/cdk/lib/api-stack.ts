@@ -8,13 +8,14 @@ import * as elbv2 from "aws-cdk-lib/aws-elasticloadbalancingv2";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import type { Construct } from "constructs";
+import { EXPORT_API_ALB_DNS, importDbSecret, importDbSecurityGroup, importVpc } from "./imported-platform";
 
 export const PSP_SECRET_NAME = "checkout/psp";
 
 export type ApiStackProps = cdk.StackProps & {
-  readonly vpc: ec2.IVpc;
-  readonly dbSecret: secretsmanager.ISecret;
-  readonly dbSecurityGroup: ec2.SecurityGroup;
+  readonly vpc?: ec2.IVpc;
+  readonly dbSecret?: secretsmanager.ISecret;
+  readonly dbSecurityGroup?: ec2.ISecurityGroup;
 };
 
 /**
@@ -30,6 +31,10 @@ export class ApiStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: ApiStackProps) {
     super(scope, id, props);
 
+    const vpc = props.vpc ?? importVpc(this, "ImportedVpc");
+    const dbSecret = props.dbSecret ?? importDbSecret(this, "ImportedDbSecret");
+    const dbSecurityGroup =
+      props.dbSecurityGroup ?? importDbSecurityGroup(this, "ImportedDbSg");
     const repoRoot = path.join(__dirname, "..", "..", "..");
     const pspSecret = secretsmanager.Secret.fromSecretNameV2(
       this,
@@ -38,7 +43,7 @@ export class ApiStack extends cdk.Stack {
     );
 
     const cluster = new ecs.Cluster(this, "Cluster", {
-      vpc: props.vpc,
+      vpc,
       containerInsightsV2: ecs.ContainerInsights.DISABLED,
     });
 
@@ -85,11 +90,11 @@ export class ApiStack extends cdk.Stack {
             PORT: "3001",
           },
           secrets: {
-            DB_USER: ecs.Secret.fromSecretsManager(props.dbSecret, "username"),
-            DB_PASSWORD: ecs.Secret.fromSecretsManager(props.dbSecret, "password"),
-            DB_HOST: ecs.Secret.fromSecretsManager(props.dbSecret, "host"),
-            DB_PORT: ecs.Secret.fromSecretsManager(props.dbSecret, "port"),
-            DB_NAME: ecs.Secret.fromSecretsManager(props.dbSecret, "dbname"),
+            DB_USER: ecs.Secret.fromSecretsManager(dbSecret, "username"),
+            DB_PASSWORD: ecs.Secret.fromSecretsManager(dbSecret, "password"),
+            DB_HOST: ecs.Secret.fromSecretsManager(dbSecret, "host"),
+            DB_PORT: ecs.Secret.fromSecretsManager(dbSecret, "port"),
+            DB_NAME: ecs.Secret.fromSecretsManager(dbSecret, "dbname"),
             PSP_BASE_URL: ecs.Secret.fromSecretsManager(pspSecret, "PSP_BASE_URL"),
             PSP_PRIVATE_KEY: ecs.Secret.fromSecretsManager(
               pspSecret,
@@ -125,7 +130,7 @@ export class ApiStack extends cdk.Stack {
     );
 
     service.service.connections.allowTo(
-      props.dbSecurityGroup,
+      dbSecurityGroup,
       ec2.Port.tcp(5432),
       "Fargate Nest API to PostgreSQL",
     );
@@ -135,6 +140,7 @@ export class ApiStack extends cdk.Stack {
 
     new cdk.CfnOutput(this, "ApiAlbDns", {
       value: this.loadBalancerDnsName,
+      exportName: EXPORT_API_ALB_DNS,
     });
     new cdk.CfnOutput(this, "ApiTargetGroupArn", {
       value: service.targetGroup.targetGroupArn,

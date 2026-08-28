@@ -1,6 +1,12 @@
 import * as cdk from "aws-cdk-lib";
 import * as ec2 from "aws-cdk-lib/aws-ec2";
 import type { Construct } from "constructs";
+import {
+  EXPORT_ISOLATED_SUBNET_IDS,
+  EXPORT_PUBLIC_SUBNET_IDS,
+  EXPORT_VPC_AZS,
+  EXPORT_VPC_ID,
+} from "./imported-platform";
 
 /**
  * VPC with public subnets (ALB + Fargate with a public IP) and isolated
@@ -28,6 +34,29 @@ export class NetworkStack extends cdk.Stack {
           cidrMask: 24,
         },
       ],
+    });
+
+    new cdk.CfnOutput(this, "VpcId", {
+      value: this.vpc.vpcId,
+      exportName: EXPORT_VPC_ID,
+    });
+    new cdk.CfnOutput(this, "VpcAzs", {
+      value: cdk.Fn.join(",", this.vpc.availabilityZones),
+      exportName: EXPORT_VPC_AZS,
+    });
+    new cdk.CfnOutput(this, "PublicSubnetIds", {
+      value: cdk.Fn.join(
+        ",",
+        this.vpc.publicSubnets.map((subnet) => subnet.subnetId),
+      ),
+      exportName: EXPORT_PUBLIC_SUBNET_IDS,
+    });
+    new cdk.CfnOutput(this, "IsolatedSubnetIds", {
+      value: cdk.Fn.join(
+        ",",
+        this.vpc.isolatedSubnets.map((subnet) => subnet.subnetId),
+      ),
+      exportName: EXPORT_ISOLATED_SUBNET_IDS,
     });
   }
 }

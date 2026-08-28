@@ -4,7 +4,7 @@ Kata de checkout: un producto, pago con tarjeta de prueba contra una pasarela **
 
 **Links** · Live: [https://d1ijyiafiowx0e.cloudfront.net](https://d1ijyiafiowx0e.cloudfront.net) · Swagger: [https://d1ijyiafiowx0e.cloudfront.net/docs](https://d1ijyiafiowx0e.cloudfront.net/docs) · Local web: `http://localhost:5173` · Local API: `http://localhost:3001/api/v1` · Cobertura: umbral **80%** · [Tablero](https://github.com/users/Juancho2406/projects/3)
 
-En `main`, GitHub Actions despliega a AWS (OIDC) en este orden: red → RDS → Fargate+ALB → SPA en CloudFront, con pausas y espera de health en CloudFront.
+En `main`, GitHub Actions **prueba todo** (`ci.yml`) y **despliega solo lo que cambió**: `apps/api` → Fargate, `apps/web` → S3/CloudFront, `infra/cdk` → VPC/RDS y plantillas CDK.
 
 ## Stack (objetivo)
 
@@ -57,10 +57,12 @@ Contrato vivo: [`http://localhost:3001/docs`](http://localhost:3001/docs) (JSON 
 
 ## CI y deploy
 
-Un workflow (`.github/workflows/ci.yml`):
+- **CI** (`.github/workflows/ci.yml`): en `pull_request` y `push` a `main` corre tests del monorepo. No despliega.
+- **Deploy API** (`deploy-api.yml`): si cambia `apps/api/**`, prueba el API y hace `cdk deploy CheckoutApi -c target=api` (imagen Fargate). No sube la SPA.
+- **Deploy web** (`deploy-web.yml`): si cambia `apps/web/**`, prueba/build de la SPA y `cdk deploy CheckoutWeb -c target=web`. No reconstruye Nest.
+- **Deploy IaC** (`deploy-iac.yml`): si cambia `infra/cdk/**`, actualiza VPC/RDS y, si tocó esas plantillas, API o CloudFront.
 
-- En `pull_request` y `push` a `main`: Node desde `.nvmrc`, pnpm vía Corepack, `pnpm install --frozen-lockfile`, y `lint`/`test` de cada workspace **si el script existe**.
-- En `push` a `main` (después de que CI pase): OIDC a AWS, `cdk bootstrap`, secreto PSP en Secrets Manager, build de la SPA, y deploy **en orden** con pausas: red → RDS → API Fargate → espera de targets healthy en el ALB (el listener no es público; CloudFront es el único origen) → S3+CloudFront → espera health por HTTPS.
+Los tres deploys usan el mismo lock de concurrencia (`payment-checkout-aws`) para no pisarse en CloudFormation. El ALB no es público; CloudFront es el único origen.
 
 ## Cómo se cierra un slice
 

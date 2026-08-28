@@ -3,6 +3,7 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import * as rds from "aws-cdk-lib/aws-rds";
 import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
 import type { Construct } from "constructs";
+import { EXPORT_DB_SECRET_ARN, EXPORT_DB_SG_ID } from "./imported-platform";
 
 export type DbStackProps = cdk.StackProps & {
   readonly vpc: ec2.IVpc;
@@ -54,5 +55,14 @@ export class DbStack extends cdk.Stack {
       throw new Error("RDS did not create a credentials secret");
     }
     this.secret = secret;
+
+    new cdk.CfnOutput(this, "DbSecretArn", {
+      value: this.secret.secretArn,
+      exportName: EXPORT_DB_SECRET_ARN,
+    });
+    new cdk.CfnOutput(this, "DbSecurityGroupId", {
+      value: this.securityGroup.securityGroupId,
+      exportName: EXPORT_DB_SG_ID,
+    });
   }
 }

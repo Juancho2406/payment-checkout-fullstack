@@ -6,11 +6,15 @@
  *     -> CheckoutApi (ECS Fargate + ALB; same hexagonal Nest API)
  *   CheckoutWeb (S3 + CloudFront) — HTTPS edge in front of SPA and `/api/*`
  *
+ * `cdk deploy -c target=platform|api|web|all` synthesizes only that slice so
+ * a web push does not rebuild the API image and an API push does not upload the SPA.
+ *
  * Local equivalent: ../docker-compose.yml (Postgres only).
  */
 import * as cdk from "aws-cdk-lib";
 import { ApiStack } from "../lib/api-stack";
 import { DbStack } from "../lib/db-stack";
+import { EXPORT_API_ALB_DNS, readDeployTarget } from "../lib/imported-platform";
 import { NetworkStack } from "../lib/network-stack";
 import { WebStack } from "../lib/web-stack";
 
@@ -21,18 +25,35 @@ const env: cdk.Environment = {
   region: process.env.CDK_DEFAULT_REGION,
 };
 
-const network = new NetworkStack(app, "CheckoutNetwork", { env });
-const db = new DbStack(app, "CheckoutDb", { env, vpc: network.vpc });
-const api = new ApiStack(app, "CheckoutApi", {
-  env,
-  vpc: network.vpc,
-  dbSecret: db.secret,
-  dbSecurityGroup: db.securityGroup,
-});
-new WebStack(app, "CheckoutWeb", {
-  env,
-  loadBalancer: api.loadBalancer,
-});
+const target = readDeployTarget(app);
+
+if (target === "platform" || target === "all") {
+  const network = new NetworkStack(app, "CheckoutNetwork", { env });
+  const db = new DbStack(app, "CheckoutDb", { env, vpc: network.vpc });
+  if (target === "all") {
+    const api = new ApiStack(app, "CheckoutApi", {
+      env,
+      vpc: network.vpc,
+      dbSecret: db.secret,
+      dbSecurityGroup: db.securityGroup,
+    });
+    new WebStack(app, "CheckoutWeb", {
+      env,
+      apiOriginHostname: api.loadBalancer.loadBalancerDnsName,
+    });
+  }
+}
+
+if (target === "api") {
+  new ApiStack(app, "CheckoutApi", { env });
+}
+
+if (target === "web") {
+  new WebStack(app, "CheckoutWeb", {
+    env,
+    apiOriginHostname: cdk.Fn.importValue(EXPORT_API_ALB_DNS),
+  });
+}
 
 cdk.Tags.of(app).add("project", "payment-checkout-fullstack");
 

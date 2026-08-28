@@ -1,0 +1,55 @@
+name: Deploy API
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/api/**"
+      - ".github/workflows/deploy-api.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: payment-checkout-aws
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup-workspace
+
+      - name: Test API
+        run: pnpm --filter @checkout/api test
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-duration-seconds: 3600
+
+      - name: Upsert PSP secret in Secrets Manager
+        env:
+          PSP_BASE_URL: ${{ secrets.PSP_BASE_URL }}
+          PSP_PRIVATE_KEY: ${{ secrets.PSP_PRIVATE_KEY }}
+          PSP_INTEGRITY_SECRET: ${{ secrets.PSP_INTEGRITY_SECRET }}
+        run: python3 .github/scripts/upsert-psp-secret.py
+
+      - name: Deploy API (Fargate)
+        working-directory: infra/cdk
+        run: pnpm exec cdk deploy CheckoutApi -c target=api --exclusively --require-approval never
+
+      - name: Wait for API targets to become healthy
+        run: bash .github/scripts/wait-api-targets.sh

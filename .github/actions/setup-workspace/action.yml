@@ -1,0 +1,15 @@
+name: Setup Node and pnpm
+description: Node from .nvmrc, Corepack, frozen lockfile install
+runs:
+  using: composite
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: .nvmrc
+    - name: Enable Corepack
+      run: corepack enable
+      shell: bash
+    - name: Install workspace
+      run: pnpm install --frozen-lockfile
+      shell: bash

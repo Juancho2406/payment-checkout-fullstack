@@ -146,6 +146,10 @@
     "e46744f8f53ce1f4ef23f83aa42c482f1d51338f": [
       "RM-25",
       "RM-26"
+    ],
+    "eb9a5fdc820876373b7a42ba5f1114e52cb98f65": [
+      "RM-07",
+      "RM-08"
     ]
   },
   "byIssue": {
@@ -373,7 +377,7 @@
         },
         {
           "message": "docs(kata): document seed, test cards, and pay claim",
-          "sha": ""
+          "sha": "eb9a5fdc820876373b7a42ba5f1114e52cb98f65"
         }
       ]
     },
@@ -409,7 +413,7 @@
         },
         {
           "message": "docs(kata): document seed, test cards, and pay claim",
-          "sha": ""
+          "sha": "eb9a5fdc820876373b7a42ba5f1114e52cb98f65"
         }
       ]
     },
@@ -946,8 +950,8 @@
         {
           "message": "fix(infra): restrict ALB to CloudFront and add SPA CSP",
           "sha": "e46744f8f53ce1f4ef23f83aa42c482f1d51338f"
+        },
+        {
+          "message": "ci: split API, web, and IaC deploys by path",
+          "sha": ""
         }
-      ]
-    }
-  ]
-}
