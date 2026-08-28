@@ -142,6 +142,10 @@
     ],
     "fda52e174605836d0bdeb3d16e5290322f967d3b": [
       "RM-18"
+    ],
+    "e46744f8f53ce1f4ef23f83aa42c482f1d51338f": [
+      "RM-25",
+      "RM-26"
     ]
   },
   "byIssue": {
@@ -366,6 +370,10 @@
         {
           "message": "docs(repo): add root README",
           "sha": "fc4248935ac71b2f524b0f111432331fbf91f8c5"
+        },
+        {
+          "message": "docs(kata): document seed, test cards, and pay claim",
+          "sha": ""
         }
       ]
     },
@@ -398,6 +406,10 @@
         {
           "message": "docs(kata): document implemented Prisma data model",
           "sha": "49ca2653c3e3dea04a253fb1a037219197c2067f"
+        },
+        {
+          "message": "docs(kata): document seed, test cards, and pay claim",
+          "sha": ""
         }
       ]
     },
@@ -887,7 +899,7 @@
         },
         {
           "message": "fix(infra): restrict ALB to CloudFront and add SPA CSP",
-          "sha": ""
+          "sha": "e46744f8f53ce1f4ef23f83aa42c482f1d51338f"
         }
       ]
     },
@@ -933,7 +945,7 @@
         },
         {
           "message": "fix(infra): restrict ALB to CloudFront and add SPA CSP",
-          "sha": ""
+          "sha": "e46744f8f53ce1f4ef23f83aa42c482f1d51338f"
         }
       ]
     }

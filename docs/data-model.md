@@ -47,6 +47,7 @@ erDiagram
     string pspTransactionId
     string cardBrand
     string cardLast4
+    datetime chargeClaimedAt "lock de cobro concurrente"
     datetime createdAt
     datetime updatedAt
   }
@@ -75,7 +76,7 @@ Hay **dos FKs** entre transacción y entrega:
 
 ### Product
 
-Catálogo dummy. **No** hay `POST /products`. El seed (`apps/api/prisma/seed.ts`) upserta dos ítems:
+Catálogo dummy. **No** hay `POST /products`. El seed (`apps/api/prisma/seed.ts`) crea los dos ítems si no existen. Si ya están, **no toca `stock`**: un restart de Fargate no deshace compras. Sí puede refrescar descripción, precio e imagen.
 
 | Nombre | `priceCents` | `stock` inicial |
 |---|---|---|
@@ -155,8 +156,8 @@ Nuestra `TRANSACTION.pspTransactionId` es el id que devuelve el sandbox, no el P
 
 ## Invariantes
 
-1. `stock` nunca queda negativo.
+1. `stock` nunca queda negativo. El seed de arranque no lo restablece en filas existentes.
 2. `totalCents` se recalcula en servidor; un total manipulado en el client se ignora.
-3. Una `reference` no se cobra dos veces.
+3. Una `reference` no se cobra dos veces. `POST …/pay` reclama la fila (`chargeClaimedAt`) antes de llamar al PSP; un perdedor concurrente espera o reutiliza `pspTransactionId`.
 4. `deliveryId` en la transacción solo se setea en `APPROVED`.
 5. No hay fila de “card”. No hay columna `pan`.
