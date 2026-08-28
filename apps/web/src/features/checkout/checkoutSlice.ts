@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createAction, createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import {
   createCustomer,
   createDelivery,
@@ -55,6 +55,7 @@ export type CheckoutState = {
   paymentStatus: PaymentStatus;
   paymentError: string | null;
   transaction: CheckoutTransaction | null;
+  selectedProductId: string | null;
 };
 
 export const initialCheckoutState: CheckoutState = {
@@ -70,6 +71,7 @@ export const initialCheckoutState: CheckoutState = {
   paymentStatus: "idle",
   paymentError: null,
   transaction: null,
+  selectedProductId: null,
 };
 
 export const loadQuote = createAsyncThunk(
@@ -79,9 +81,24 @@ export const loadQuote = createAsyncThunk(
   },
 );
 
+export const stashPendingTransaction = createAction<CheckoutTransaction>(
+  "checkout/stashPendingTransaction",
+);
+
+function canReusePending(
+  transaction: CheckoutTransaction | null,
+  productId: string,
+): transaction is CheckoutTransaction {
+  return (
+    transaction !== null &&
+    transaction.productId === productId &&
+    (transaction.status === "PENDING" || transaction.status === "ERROR")
+  );
+}
+
 export const confirmPayment = createAsyncThunk(
   "checkout/confirmPayment",
-  async (_, { getState }): Promise<CheckoutTransaction> => {
+  async (_, { getState, dispatch }): Promise<CheckoutTransaction> => {
     const { product, checkout } = getState() as {
       product: { item: CatalogProduct | null };
       checkout: CheckoutState;
@@ -104,30 +121,37 @@ export const confirmPayment = createAsyncThunk(
       throw new Error("Vuelve a ingresar la tarjeta");
     }
 
-    const createdCustomer = await createCustomer(customer);
-    const createdDelivery = await createDelivery({
-      customerId: createdCustomer.id,
-      address: delivery.address,
-      city: delivery.city,
-      region: delivery.region,
-      postalCode: delivery.postalCode,
-    });
-    const pending = await createPendingTransaction({
-      productId: catalogItem.id,
-      quantity: 1,
-      customerId: createdCustomer.id,
-      deliveryId: createdDelivery.id,
-    });
+    let pending = (getState() as { checkout: CheckoutState }).checkout.transaction;
+    if (!canReusePending(pending, catalogItem.id)) {
+      const createdCustomer = await createCustomer(customer);
+      const createdDelivery = await createDelivery({
+        customerId: createdCustomer.id,
+        address: delivery.address,
+        city: delivery.city,
+        region: delivery.region,
+        postalCode: delivery.postalCode,
+      });
+      pending = await createPendingTransaction({
+        productId: catalogItem.id,
+        quantity: 1,
+        customerId: createdCustomer.id,
+        deliveryId: createdDelivery.id,
+      });
+      dispatch(stashPendingTransaction(pending));
+    }
+    if (!pending) {
+      throw new Error("Faltan datos del checkout");
+    }
     let paid = await payTransaction(pending.id, {
       paymentToken: tokens.paymentToken,
       acceptanceToken: tokens.acceptanceToken,
       acceptPersonalAuth: tokens.acceptPersonalAuth,
       installments: 1,
     });
-    takeIssuedTokens();
     if (paid.status === "PENDING") {
       paid = await pollTransactionUntilTerminal(paid.id);
     }
+    takeIssuedTokens();
     return paid;
   },
 );
@@ -154,6 +178,9 @@ const checkoutSlice = createSlice({
     resetCheckout() {
       return initialCheckoutState;
     },
+    rememberProductId(state, action: PayloadAction<string>) {
+      state.selectedProductId = action.payload;
+    },
     saveCheckoutDraft(
       state,
       action: PayloadAction<{
@@ -172,11 +199,19 @@ const checkoutSlice = createSlice({
       state.quoteError = null;
       state.paymentStatus = "idle";
       state.paymentError = null;
-      state.transaction = null;
+      if (
+        state.transaction?.status !== "PENDING" &&
+        state.transaction?.status !== "ERROR"
+      ) {
+        state.transaction = null;
+      }
     },
   },
   extraReducers: (builder) => {
     builder
+      .addCase(stashPendingTransaction, (state, action) => {
+        state.transaction = action.payload;
+      })
       .addCase(loadQuote.pending, (state) => {
         state.quoteStatus = "loading";
         state.quoteError = null;
@@ -214,6 +249,7 @@ export const {
   closeSummaryBackdrop,
   backToCheckoutModal,
   resetCheckout,
+  rememberProductId,
   saveCheckoutDraft,
 } = checkoutSlice.actions;
 export const checkoutReducer = checkoutSlice.reducer;

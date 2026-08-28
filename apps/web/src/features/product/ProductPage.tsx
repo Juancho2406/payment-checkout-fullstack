@@ -3,7 +3,7 @@ import type { CatalogProduct } from "../../lib/api";
 import { formatCopFromCents } from "../../lib/money";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { CheckoutModal } from "../checkout/CheckoutModal";
-import { openCheckoutModal } from "../checkout/checkoutSlice";
+import { openCheckoutModal, rememberProductId } from "../checkout/checkoutSlice";
 import { SummaryBackdrop } from "../checkout/SummaryBackdrop";
 import { loadCatalog, selectProduct } from "./productSlice";
 
@@ -12,12 +12,25 @@ export function ProductPage() {
   const { status, items, error } = useAppSelector((state) => state.product);
   const modalOpen = useAppSelector((state) => state.checkout.modalOpen);
   const summaryOpen = useAppSelector((state) => state.checkout.summaryOpen);
+  const selectedProductId = useAppSelector(
+    (state) =>
+      state.checkout.selectedProductId ??
+      state.checkout.transaction?.productId ??
+      state.checkout.quote?.productId ??
+      null,
+  );
 
   useEffect(() => {
     if (status === "idle") {
       void dispatch(loadCatalog());
     }
   }, [dispatch, status]);
+
+  useEffect(() => {
+    if (status === "succeeded" && selectedProductId) {
+      dispatch(selectProduct(selectedProductId));
+    }
+  }, [dispatch, status, selectedProductId]);
 
   if (status === "idle" || status === "loading") {
     return (
@@ -49,12 +62,17 @@ export function ProductPage() {
   }
 
   function startCheckout(product: CatalogProduct) {
+    dispatch(rememberProductId(product.id));
     dispatch(selectProduct(product.id));
     dispatch(openCheckoutModal());
   }
 
   return (
     <main className="page">
+      <header className="page-header">
+        <p className="eyebrow">Checkout</p>
+        <h1>Productos</h1>
+      </header>
       <ul className="catalog">
         {items.map((product) => {
           const outOfStock = product.stock < 1;
@@ -64,7 +82,7 @@ export function ProductPage() {
                 <img className="card__image" src={product.imageUrl} alt={product.name} />
                 <div className="card__body">
                   <p className="eyebrow">Producto</p>
-                  <h1 className="card__title">{product.name}</h1>
+                  <h2 className="card__title">{product.name}</h2>
                   <p className="card__description">{product.description}</p>
                   <p className="card__price">{formatCopFromCents(product.priceCents)}</p>
                   <p className="card__stock">

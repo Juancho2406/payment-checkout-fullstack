@@ -51,7 +51,11 @@ export function toPersistedCheckout(state: PersistableState): PersistedCheckout 
     delivery: checkout.delivery,
     cardPreview: checkout.cardPreview,
     productId:
-      product.item?.id ?? checkout.transaction?.productId ?? checkout.quote?.productId ?? null,
+      product.item?.id ??
+      checkout.selectedProductId ??
+      checkout.transaction?.productId ??
+      checkout.quote?.productId ??
+      null,
     quantity: checkout.transaction?.quantity ?? checkout.quote?.quantity ?? 1,
     transaction: checkout.transaction,
   };
@@ -69,6 +73,9 @@ export function isEmptyProgress(snapshot: PersistedCheckout): boolean {
 }
 
 export function checkoutFromSnapshot(snapshot: PersistedCheckout): CheckoutState {
+  const terminal =
+    snapshot.transaction?.status === "APPROVED" ||
+    snapshot.transaction?.status === "DECLINED";
   return {
     ...initialCheckoutState,
     screen: snapshot.screen,
@@ -78,7 +85,8 @@ export function checkoutFromSnapshot(snapshot: PersistedCheckout): CheckoutState
     delivery: snapshot.delivery,
     cardPreview: snapshot.cardPreview,
     transaction: snapshot.transaction,
-    paymentStatus: snapshot.transaction ? "succeeded" : "idle",
+    selectedProductId: snapshot.productId,
+    paymentStatus: terminal ? "succeeded" : "idle",
   };
 }
 

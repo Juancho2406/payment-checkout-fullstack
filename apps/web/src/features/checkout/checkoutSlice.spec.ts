@@ -153,6 +153,7 @@ describe("checkoutSlice reducers", () => {
 describe("confirmPayment", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   it("tokenizes in the browser then charges through the API", async () => {
@@ -188,6 +189,50 @@ describe("confirmPayment", () => {
     expect(store.getState().checkout.screen).toBe("status");
     expect(store.getState().checkout.transaction?.status).toBe("APPROVED");
     expect(vi.mocked(tokenizeCard)).toHaveBeenCalled();
+  });
+
+  it("retries pay on the same PENDING instead of reserving stock again", async () => {
+    vi.mocked(tokenizeCard).mockResolvedValue({
+      paymentToken: "tok_test",
+      acceptanceToken: "acc",
+      acceptPersonalAuth: "personal",
+    });
+    vi.mocked(createCustomer).mockResolvedValue({
+      id: "c1",
+      ...draft.customer,
+    });
+    vi.mocked(createDelivery).mockResolvedValue({
+      id: "d1",
+      customerId: "c1",
+      ...draft.delivery,
+      status: "draft",
+    });
+    vi.mocked(createPendingTransaction).mockResolvedValue({ ...paid, status: "PENDING" });
+    vi.mocked(payTransaction)
+      .mockRejectedValueOnce(new Error("network"))
+      .mockResolvedValue({ ...paid, status: "PENDING" });
+    vi.mocked(pollTransactionUntilTerminal).mockResolvedValue(paid);
+
+    saveCardSession({
+      pan: "4111111111111111",
+      cvc: "123",
+      expiry: "12/29",
+      cardholder: "ANA PEREZ",
+    });
+    const store = makeStore(
+      testState({ item: headphones, status: "succeeded" }, { ...draft, summaryOpen: true }),
+    );
+    await store.dispatch(confirmPayment());
+    expect(store.getState().checkout.paymentStatus).toBe("failed");
+    expect(store.getState().checkout.transaction?.status).toBe("PENDING");
+    vi.mocked(createPendingTransaction).mockClear();
+    vi.mocked(payTransaction).mockClear();
+    vi.mocked(payTransaction).mockResolvedValue({ ...paid, status: "PENDING" });
+
+    await store.dispatch(confirmPayment());
+    expect(vi.mocked(createPendingTransaction)).not.toHaveBeenCalled();
+    expect(vi.mocked(payTransaction)).toHaveBeenCalledTimes(1);
+    expect(store.getState().checkout.transaction?.status).toBe("APPROVED");
   });
 
   it("asks to re-enter the card when the session is gone", async () => {

@@ -129,6 +129,9 @@
     ],
     "97b341c3f5b1187936dad0c15cb83b8e1d6795b4": [
       "RM-11"
+    ],
+    "73d28e632866a1402947eb6baea160d5ccdc50d9": [
+      "RM-17"
     ]
   },
   "byIssue": {
@@ -633,7 +636,7 @@
         },
         {
           "message": "fix(api): claim PSP charge before createCharge",
-          "sha": ""
+          "sha": "73d28e632866a1402947eb6baea160d5ccdc50d9"
         }
       ]
     },
@@ -722,6 +725,10 @@
         {
           "message": "feat(web): add payment summary backdrop",
           "sha": "749a17d96f692f5e90bd9d0260aac76661f036e3"
+        },
+        {
+          "message": "fix(web): reuse PENDING transaction on pay retry",
+          "sha": ""
         }
       ]
     },
@@ -775,6 +782,10 @@
         {
           "message": "feat(web): persist checkout progress across refresh",
           "sha": "bb6556fddd0f1b7581655aa46330443cd7126955"
+        },
+        {
+          "message": "fix(web): reuse PENDING transaction on pay retry",
+          "sha": ""
         }
       ]
     },

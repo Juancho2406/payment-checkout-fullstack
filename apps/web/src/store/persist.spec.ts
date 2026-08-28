@@ -130,7 +130,25 @@ describe("checkout persist", () => {
     expect(hydrated.getState().checkout.summaryOpen).toBe(true);
     expect(hydrated.getState().checkout.customer?.email).toBe("ana@example.com");
     expect(hydrated.getState().checkout.delivery?.city).toBe("Bogotá");
+    expect(hydrated.getState().checkout.selectedProductId).toBeNull();
     expect(JSON.stringify(hydrated.getState())).not.toContain("4111111111111111");
+  });
+
+  it("restores the selected product and does not mark a PENDING pay as succeeded", () => {
+    savePersistedCheckout(
+      testState(
+        { item: { id: "prod-1", name: "x", description: "", priceCents: 1, currency: "COP", stock: 1, imageUrl: "" } },
+        {
+          summaryOpen: true,
+          selectedProductId: "prod-1",
+          transaction: { ...transaction, status: "PENDING", pspTransactionId: null },
+        },
+      ),
+    );
+    const hydrated = makeStore();
+    expect(hydrated.getState().checkout.selectedProductId).toBe("prod-1");
+    expect(hydrated.getState().checkout.paymentStatus).toBe("idle");
+    expect(hydrated.getState().checkout.transaction?.status).toBe("PENDING");
   });
 
   it("clears storage when checkout is reset to empty", () => {
