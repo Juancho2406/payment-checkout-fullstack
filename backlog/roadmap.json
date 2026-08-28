@@ -136,6 +136,9 @@
     "91b6e4b2a1fbc5a33eeafaccbacbd452ef8c7ccb": [
       "RM-20",
       "RM-22"
+    ],
+    "368ccb165aa153eff9224ec6e02a6e478dd6da78": [
+      "RM-19"
     ]
   },
   "byIssue": {
@@ -676,6 +679,10 @@
         {
           "message": "fix(web): copy catalog into a mutable Redux draft",
           "sha": "8ccc9113ef176ffe0df86094126d4966bfeb42ce"
+        },
+        {
+          "message": "fix(web): layout catalog for desktop",
+          "sha": ""
         }
       ]
     },
@@ -705,7 +712,7 @@
         },
         {
           "message": "fix(web): validate phone while typing",
-          "sha": ""
+          "sha": "368ccb165aa153eff9224ec6e02a6e478dd6da78"
         }
       ]
     },
