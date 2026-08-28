@@ -132,6 +132,10 @@
     ],
     "73d28e632866a1402947eb6baea160d5ccdc50d9": [
       "RM-17"
+    ],
+    "91b6e4b2a1fbc5a33eeafaccbacbd452ef8c7ccb": [
+      "RM-20",
+      "RM-22"
     ]
   },
   "byIssue": {
@@ -698,6 +702,10 @@
         {
           "message": "feat(web): add card and delivery modal",
           "sha": "44b7e41a3dfe5874e698a0e8c66f6d5c0df472c0"
+        },
+        {
+          "message": "fix(web): validate phone while typing",
+          "sha": ""
         }
       ]
     },
@@ -728,7 +736,7 @@
         },
         {
           "message": "fix(web): reuse PENDING transaction on pay retry",
-          "sha": ""
+          "sha": "91b6e4b2a1fbc5a33eeafaccbacbd452ef8c7ccb"
         }
       ]
     },
@@ -785,7 +793,7 @@
         },
         {
           "message": "fix(web): reuse PENDING transaction on pay retry",
-          "sha": ""
+          "sha": "91b6e4b2a1fbc5a33eeafaccbacbd452ef8c7ccb"
         }
       ]
     },

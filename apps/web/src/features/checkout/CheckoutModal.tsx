@@ -12,10 +12,12 @@ import {
 } from "../../lib/card";
 import { saveCardSession } from "../../lib/card-session";
 import {
+  formatColombianPhone,
   isNonEmpty,
   isValidColombianPhone,
   isValidEmail,
   isValidFullName,
+  liveColombianPhoneError,
 } from "../../lib/identity";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { BrandMark } from "./BrandMark";
@@ -177,10 +179,24 @@ export function CheckoutModal() {
                 Celular
                 <input
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  inputMode="tel"
+                  onChange={(e) => {
+                    const next = formatColombianPhone(e.target.value);
+                    setPhone(next);
+                    setErrors((current) => {
+                      const nextErrors = { ...current };
+                      const message = liveColombianPhoneError(next);
+                      if (message) {
+                        nextErrors.phone = message;
+                      } else {
+                        delete nextErrors.phone;
+                      }
+                      return nextErrors;
+                    });
+                  }}
+                  inputMode="numeric"
                   placeholder="3001112233"
                   autoComplete="tel"
+                  data-testid="phone"
                 />
                 {errors.phone ? <span className="field-error">{errors.phone}</span> : null}
               </label>

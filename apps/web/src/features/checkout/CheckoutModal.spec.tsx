@@ -70,4 +70,13 @@ describe("CheckoutModal", () => {
     expect(peekCardSession()?.pan).toBe("4111111111111111");
     expect(peekCardSession()?.cvc).toBe("123");
   });
+
+  it("rejects letters in the phone field as the user types", async () => {
+    const user = userEvent.setup();
+    renderModal();
+    const phone = screen.getByTestId("phone");
+    await user.type(phone, "ab2001112233");
+    expect(phone).toHaveValue("2001112233");
+    expect(screen.getByText("Usa un celular CO (3 + 9 dígitos)")).toBeInTheDocument();
+  });
 });
