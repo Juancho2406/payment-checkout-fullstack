@@ -55,6 +55,11 @@ export class WebStack extends cdk.Stack {
           referrerPolicy: cloudfront.HeadersReferrerPolicy.NO_REFERRER,
           override: true,
         },
+        contentSecurityPolicy: {
+          override: true,
+          contentSecurityPolicy:
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'",
+        },
       },
     });
 

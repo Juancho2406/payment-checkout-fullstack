@@ -139,6 +139,9 @@
     ],
     "368ccb165aa153eff9224ec6e02a6e478dd6da78": [
       "RM-19"
+    ],
+    "fda52e174605836d0bdeb3d16e5290322f967d3b": [
+      "RM-18"
     ]
   },
   "byIssue": {
@@ -682,7 +685,7 @@
         },
         {
           "message": "fix(web): layout catalog for desktop",
-          "sha": ""
+          "sha": "fda52e174605836d0bdeb3d16e5290322f967d3b"
         }
       ]
     },
@@ -881,6 +884,10 @@
         {
           "message": "feat(api): add security headers",
           "sha": "733087f9160cf4182b798183aac1f0d7edc24710"
+        },
+        {
+          "message": "fix(infra): restrict ALB to CloudFront and add SPA CSP",
+          "sha": ""
         }
       ]
     },
@@ -923,6 +930,10 @@
         {
           "message": "docs(readme): add live CloudFront URLs",
           "sha": "2ae113b2cac9dcb444f2fdb3a7c1d71dbc455013"
+        },
+        {
+          "message": "fix(infra): restrict ALB to CloudFront and add SPA CSP",
+          "sha": ""
         }
       ]
     }

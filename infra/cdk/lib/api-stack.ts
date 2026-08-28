@@ -18,7 +18,8 @@ export type ApiStackProps = cdk.StackProps & {
 };
 
 /**
- * Hexagonal Nest API on ECS Fargate behind an internet-facing ALB (HTTP).
+ * Hexagonal Nest API on ECS Fargate behind an ALB (HTTP).
+ * The listener is not public: only CloudFront origin-facing IPs.
  * HTTPS is terminated at CloudFront in WebStack (`/api/*` → this ALB).
  * Not Lambda.
  */
@@ -63,6 +64,7 @@ export class ApiStack extends cdk.Stack {
         idleTimeout: cdk.Duration.seconds(120),
         minHealthyPercent: 0,
         maxHealthyPercent: 200,
+        openListener: false,
         circuitBreaker: { enable: true, rollback: true },
         runtimePlatform: {
           cpuArchitecture: ecs.CpuArchitecture.X86_64,
@@ -111,6 +113,17 @@ export class ApiStack extends cdk.Stack {
       unhealthyThresholdCount: 5,
     });
 
+    const cloudFrontOriginFacing = ec2.PrefixList.fromLookup(
+      this,
+      "CloudFrontOriginFacing",
+      { prefixListName: "com.amazonaws.global.cloudfront.origin-facing" },
+    );
+    service.loadBalancer.connections.allowFrom(
+      cloudFrontOriginFacing,
+      ec2.Port.tcp(80),
+      "CloudFront to ALB",
+    );
+
     service.service.connections.allowTo(
       props.dbSecurityGroup,
       ec2.Port.tcp(5432),
@@ -122,6 +135,9 @@ export class ApiStack extends cdk.Stack {
 
     new cdk.CfnOutput(this, "ApiAlbDns", {
       value: this.loadBalancerDnsName,
+    });
+    new cdk.CfnOutput(this, "ApiTargetGroupArn", {
+      value: service.targetGroup.targetGroupArn,
     });
   }
 }

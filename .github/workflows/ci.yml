@@ -134,21 +134,25 @@ jobs:
         working-directory: infra/cdk
         run: pnpm exec cdk deploy CheckoutApi --exclusively --require-approval never
 
-      - name: Wait for API health on the ALB
+      - name: Wait for API targets to become healthy
         run: |
           set -euo pipefail
-          DNS="$(aws cloudformation describe-stacks --stack-name CheckoutApi \
-            --query "Stacks[0].Outputs[?OutputKey=='ApiAlbDns'].OutputValue" --output text)"
-          echo "Waiting for http://${DNS}/api/v1/health"
+          TG="$(aws cloudformation describe-stacks --stack-name CheckoutApi \
+            --query "Stacks[0].Outputs[?OutputKey=='ApiTargetGroupArn'].OutputValue" --output text)"
+          echo "Waiting for target group ${TG}"
           for i in $(seq 1 40); do
-            if curl -fsS "http://${DNS}/api/v1/health" | grep -Eq '"status"[[:space:]]*:[[:space:]]*"ok"'; then
-              echo "ALB healthy"
+            HEALTHY="$(aws elbv2 describe-target-health --target-group-arn "$TG" \
+              --query "length(TargetHealthDescriptions[?TargetHealth.State=='healthy'])" --output text)"
+            TOTAL="$(aws elbv2 describe-target-health --target-group-arn "$TG" \
+              --query "length(TargetHealthDescriptions)" --output text)"
+            echo "attempt ${i}/40 — healthy ${HEALTHY}/${TOTAL}"
+            if [ "$TOTAL" != "0" ] && [ "$HEALTHY" = "$TOTAL" ]; then
+              echo "API targets healthy"
               exit 0
             fi
-            echo "attempt ${i}/40 — sleeping 15s"
             sleep 15
           done
-          echo "API did not become healthy on the ALB"
+          echo "API targets did not become healthy"
           exit 1
 
       - name: Pause before SPA
