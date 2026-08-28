@@ -9,12 +9,16 @@
  * `cdk deploy -c target=platform|api|web|all` synthesizes only that slice so
  * a web push does not rebuild the API image and an API push does not upload the SPA.
  *
+ * Isolated API/web deploys pass concrete IDs via context (`vpcId`, `dbSecretArn`,
+ * `dbSgId`, `apiOriginHostname`) instead of CloudFormation ImportValue, so
+ * updating one stack cannot delete an export the other still uses.
+ *
  * Local equivalent: ../docker-compose.yml (Postgres only).
  */
 import * as cdk from "aws-cdk-lib";
 import { ApiStack } from "../lib/api-stack";
 import { DbStack } from "../lib/db-stack";
-import { EXPORT_API_ALB_DNS, readDeployTarget } from "../lib/imported-platform";
+import { readDeployTarget, requiredContext } from "../lib/imported-platform";
 import { NetworkStack } from "../lib/network-stack";
 import { WebStack } from "../lib/web-stack";
 
@@ -51,7 +55,7 @@ if (target === "api") {
 if (target === "web") {
   new WebStack(app, "CheckoutWeb", {
     env,
-    apiOriginHostname: cdk.Fn.importValue(EXPORT_API_ALB_DNS),
+    apiOriginHostname: requiredContext(app, "apiOriginHostname"),
   });
 }
 

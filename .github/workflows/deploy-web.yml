@@ -6,11 +6,10 @@ on:
       - main
     paths:
       - "apps/web/**"
-      - ".github/workflows/deploy-web.yml"
   workflow_dispatch:
 
 concurrency:
-  group: payment-checkout-aws
+  group: checkout-cdk-web
   cancel-in-progress: false
 
 permissions:
@@ -49,9 +48,16 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-duration-seconds: 3600
 
+      - name: Resolve live ALB DNS
+        run: bash .github/scripts/resolve-platform-context.sh
+
       - name: Deploy web (S3 + CloudFront)
         working-directory: infra/cdk
-        run: pnpm exec cdk deploy CheckoutWeb -c target=web --exclusively --require-approval never
+        run: >
+          pnpm exec cdk deploy CheckoutWeb
+          -c target=web
+          -c apiOriginHostname=${CHECKOUT_API_ALB_DNS}
+          --exclusively --require-approval never
 
       - name: Wait for HTTPS health on CloudFront
         run: bash .github/scripts/wait-cloudfront.sh

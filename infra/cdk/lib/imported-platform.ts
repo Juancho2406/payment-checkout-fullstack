@@ -21,15 +21,20 @@ export function readDeployTarget(app: cdk.App): DeployTarget {
   return "all";
 }
 
+export function requiredContext(scope: Construct, key: string): string {
+  const value = scope.node.tryGetContext(key);
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new Error(
+      `CDK context -c ${key}=... is required (resolve live platform IDs before deploy)`,
+    );
+  }
+  return value.trim();
+}
+
+/** Concrete vpcId from `-c vpcId=` so Fargate can select public subnets at synth. */
 export function importVpc(scope: Construct, id: string): ec2.IVpc {
-  return ec2.Vpc.fromVpcAttributes(scope, id, {
-    vpcId: cdk.Fn.importValue(EXPORT_VPC_ID),
-    availabilityZones: cdk.Fn.split(",", cdk.Fn.importValue(EXPORT_VPC_AZS)),
-    publicSubnetIds: cdk.Fn.split(",", cdk.Fn.importValue(EXPORT_PUBLIC_SUBNET_IDS)),
-    isolatedSubnetIds: cdk.Fn.split(
-      ",",
-      cdk.Fn.importValue(EXPORT_ISOLATED_SUBNET_IDS),
-    ),
+  return ec2.Vpc.fromLookup(scope, id, {
+    vpcId: requiredContext(scope, "vpcId"),
   });
 }
 
@@ -40,7 +45,7 @@ export function importDbSecret(
   return secretsmanager.Secret.fromSecretCompleteArn(
     scope,
     id,
-    cdk.Fn.importValue(EXPORT_DB_SECRET_ARN),
+    requiredContext(scope, "dbSecretArn"),
   );
 }
 
@@ -51,6 +56,6 @@ export function importDbSecurityGroup(
   return ec2.SecurityGroup.fromSecurityGroupId(
     scope,
     id,
-    cdk.Fn.importValue(EXPORT_DB_SG_ID),
+    requiredContext(scope, "dbSgId"),
   );
 }

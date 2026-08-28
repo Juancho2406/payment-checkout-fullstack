@@ -6,11 +6,10 @@ on:
       - main
     paths:
       - "apps/api/**"
-      - ".github/workflows/deploy-api.yml"
   workflow_dispatch:
 
 concurrency:
-  group: payment-checkout-aws
+  group: checkout-cdk-api
   cancel-in-progress: false
 
 permissions:
@@ -47,9 +46,18 @@ jobs:
           PSP_INTEGRITY_SECRET: ${{ secrets.PSP_INTEGRITY_SECRET }}
         run: python3 .github/scripts/upsert-psp-secret.py
 
+      - name: Resolve live VPC, DB, and ALB
+        run: bash .github/scripts/resolve-platform-context.sh
+
       - name: Deploy API (Fargate)
         working-directory: infra/cdk
-        run: pnpm exec cdk deploy CheckoutApi -c target=api --exclusively --require-approval never
+        run: >
+          pnpm exec cdk deploy CheckoutApi
+          -c target=api
+          -c vpcId=${CHECKOUT_VPC_ID}
+          -c dbSecretArn=${CHECKOUT_DB_SECRET_ARN}
+          -c dbSgId=${CHECKOUT_DB_SG_ID}
+          --exclusively --require-approval never
 
       - name: Wait for API targets to become healthy
         run: bash .github/scripts/wait-api-targets.sh

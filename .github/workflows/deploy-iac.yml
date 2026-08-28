@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: payment-checkout-aws
+  group: checkout-cdk-iac
   cancel-in-progress: false
 
 permissions:
@@ -69,22 +69,9 @@ jobs:
         working-directory: infra/cdk
         run: pnpm exec cdk deploy CheckoutNetwork CheckoutDb -c target=platform --exclusively --require-approval never
 
-      - name: Upsert PSP secret in Secrets Manager
-        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.api_stack == 'true'
-        env:
-          PSP_BASE_URL: ${{ secrets.PSP_BASE_URL }}
-          PSP_PRIVATE_KEY: ${{ secrets.PSP_PRIVATE_KEY }}
-          PSP_INTEGRITY_SECRET: ${{ secrets.PSP_INTEGRITY_SECRET }}
-        run: python3 .github/scripts/upsert-psp-secret.py
-
-      - name: Deploy API stack definition
-        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.api_stack == 'true'
-        working-directory: infra/cdk
-        run: pnpm exec cdk deploy CheckoutApi -c target=api --exclusively --require-approval never
-
-      - name: Wait for API targets to become healthy
-        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.api_stack == 'true'
-        run: bash .github/scripts/wait-api-targets.sh
+      - name: Resolve live VPC, DB, and ALB
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.api_stack == 'true' || steps.filter.outputs.web_stack == 'true'
+        run: bash .github/scripts/resolve-platform-context.sh
 
       - name: Build SPA (same-origin /api/v1 via CloudFront)
         if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.web_stack == 'true'
@@ -97,8 +84,35 @@ jobs:
       - name: Deploy web stack definition
         if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.web_stack == 'true'
         working-directory: infra/cdk
-        run: pnpm exec cdk deploy CheckoutWeb -c target=web --exclusively --require-approval never
+        run: >
+          pnpm exec cdk deploy CheckoutWeb
+          -c target=web
+          -c apiOriginHostname=${CHECKOUT_API_ALB_DNS}
+          --exclusively --require-approval never
 
       - name: Wait for HTTPS health on CloudFront
         if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.web_stack == 'true'
         run: bash .github/scripts/wait-cloudfront.sh
+
+      - name: Upsert PSP secret in Secrets Manager
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.api_stack == 'true'
+        env:
+          PSP_BASE_URL: ${{ secrets.PSP_BASE_URL }}
+          PSP_PRIVATE_KEY: ${{ secrets.PSP_PRIVATE_KEY }}
+          PSP_INTEGRITY_SECRET: ${{ secrets.PSP_INTEGRITY_SECRET }}
+        run: python3 .github/scripts/upsert-psp-secret.py
+
+      - name: Deploy API stack definition
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.api_stack == 'true'
+        working-directory: infra/cdk
+        run: >
+          pnpm exec cdk deploy CheckoutApi
+          -c target=api
+          -c vpcId=${CHECKOUT_VPC_ID}
+          -c dbSecretArn=${CHECKOUT_DB_SECRET_ARN}
+          -c dbSgId=${CHECKOUT_DB_SG_ID}
+          --exclusively --require-approval never
+
+      - name: Wait for API targets to become healthy
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.api_stack == 'true'
+        run: bash .github/scripts/wait-api-targets.sh

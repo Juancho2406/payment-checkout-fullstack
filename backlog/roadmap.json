@@ -150,6 +150,9 @@
     "eb9a5fdc820876373b7a42ba5f1114e52cb98f65": [
       "RM-07",
       "RM-08"
+    ],
+    "819e792e5d1b0b6972a22863b9321d723471da8e": [
+      "RM-26"
     ]
   },
   "byIssue": {
@@ -953,5 +956,9 @@
         },
         {
           "message": "ci: split API, web, and IaC deploys by path",
+          "sha": "819e792e5d1b0b6972a22863b9321d723471da8e"
+        },
+        {
+          "message": "fix(infra): decouple split deploys from CFN exports",
           "sha": ""
         }

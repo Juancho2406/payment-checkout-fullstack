@@ -10,7 +10,7 @@ AWS side of `docs/architecture.drawio`. GitHub Actions on `main` deploys **only 
 
 `cdk deploy -c target=…` synthesizes **only that slice**, so a CSS change does not docker-build Nest, and a use-case change does not need `apps/web/dist`.
 
-Cross-stack wiring uses CloudFormation exports (`CheckoutVpcId`, `CheckoutApiAlbDns`, …). The first time those outputs land, `deploy-iac` updates Network/Db/Api; later app pushes import them.
+Isolated API/web deploys pass **concrete IDs** (`-c vpcId`, `-c apiOriginHostname`, …) resolved from the live account. That avoids CloudFormation `ImportValue`: updating API must not delete an export that Web still imports.
 
 ```
 bin/app.ts              wiring + `-c target`
