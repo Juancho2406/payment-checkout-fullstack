@@ -123,6 +123,9 @@
     ],
     "d5b4b198ee180250cbeb16e8063ac9b2704f019e": [
       "RM-18"
+    ],
+    "8ccc9113ef176ffe0df86094126d4966bfeb42ce": [
+      "RM-18"
     ]
   },
   "byIssue": {
@@ -458,6 +461,10 @@
         {
           "message": "feat(api): add Prisma schema and product seed",
           "sha": "97d9d9cdff38de4cde660b9c1d48bd94e3fcacb6"
+        },
+        {
+          "message": "fix(api): keep seed from resetting product stock",
+          "sha": ""
         }
       ]
     },
@@ -654,7 +661,7 @@
         },
         {
           "message": "fix(web): copy catalog into a mutable Redux draft",
-          "sha": ""
+          "sha": "8ccc9113ef176ffe0df86094126d4966bfeb42ce"
         }
       ]
     },
