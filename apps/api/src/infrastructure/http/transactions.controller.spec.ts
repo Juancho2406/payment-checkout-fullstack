@@ -168,6 +168,14 @@ class FakeTransactionRepository implements TransactionRepository {
     return updated;
   }
 
+  async tryClaimCharge(): Promise<never> {
+    throw new Error("not used");
+  }
+
+  async releaseChargeClaim(): Promise<never> {
+    throw new Error("not used");
+  }
+
   async finalizePay(input: FinalizePayInput): Promise<CheckoutTransaction | null> {
     const index = this.rows.findIndex((row) => row.id === input.id);
     if (index < 0) {

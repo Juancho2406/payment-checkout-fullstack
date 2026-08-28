@@ -9,6 +9,7 @@ import {
   TRANSACTION_STATUS_PENDING,
   type AttachPspChargeInput,
   type CheckoutTransaction,
+  type ClaimChargeOutcome,
   type CreatePendingOutcome,
   type FinalizePayInput,
   type NewPendingTransaction,
@@ -162,6 +163,37 @@ export class PrismaTransactionRepository implements TransactionRepository {
       },
     });
     return toCheckoutTransaction(row);
+  }
+
+  async tryClaimCharge(id: string): Promise<ClaimChargeOutcome> {
+    if (!UUID_RE.test(id)) {
+      return { kind: "unavailable", transaction: null };
+    }
+    const claimed = await this.prisma.transaction.updateMany({
+      where: {
+        id,
+        status: TRANSACTION_STATUS_PENDING,
+        pspTransactionId: null,
+        chargeClaimedAt: null,
+      },
+      data: { chargeClaimedAt: new Date() },
+    });
+    const row = await this.prisma.transaction.findUnique({ where: { id } });
+    const transaction = row ? toCheckoutTransaction(row) : null;
+    if (claimed.count === 1 && transaction) {
+      return { kind: "claimed", transaction };
+    }
+    return { kind: "unavailable", transaction };
+  }
+
+  async releaseChargeClaim(id: string): Promise<void> {
+    if (!UUID_RE.test(id)) {
+      return;
+    }
+    await this.prisma.transaction.updateMany({
+      where: { id, pspTransactionId: null },
+      data: { chargeClaimedAt: null },
+    });
   }
 
   async finalizePay(input: FinalizePayInput): Promise<CheckoutTransaction | null> {

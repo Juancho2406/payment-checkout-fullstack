@@ -70,66 +70,91 @@ export class PayTransactionQuery {
       return err(customerNotFound(transaction.customerId));
     }
 
-    let charge: PspCharge;
     if (transaction.pspTransactionId) {
-      const polled = await this.pollUntilTerminal(transaction.pspTransactionId);
-      if (!polled.ok) {
-        await this.transactions.finalizePay(
-          settlement(transaction, {
-            pspTransactionId: transaction.pspTransactionId,
-            status: "ERROR",
-            cardBrand: transaction.cardBrand,
-            cardLast4: transaction.cardLast4,
-          }),
-        );
-        return polled;
-      }
-      charge = polled.value;
-    } else {
-      const created = await this.gateway.createCharge({
-        amountInCents: transaction.totalCents,
-        currency: transaction.currency,
-        customerEmail: customer.email,
-        paymentToken: tokens.value.paymentToken,
-        reference: transaction.reference,
-        acceptanceToken: tokens.value.acceptanceToken,
-        acceptPersonalAuth: tokens.value.acceptPersonalAuth,
-        installments: tokens.value.installments,
-        signature: integritySignature({
-          reference: transaction.reference,
-          amountInCents: transaction.totalCents,
-          currency: transaction.currency,
-          secret: this.settings.integritySecret,
-        }),
-      });
-      if (!created.ok) {
-        return created;
-      }
-      const attached = await this.transactions.attachPspCharge(transaction.id, {
-        pspTransactionId: created.value.pspTransactionId,
-        cardBrand: created.value.cardBrand,
-        cardLast4: created.value.cardLast4,
-      });
-      const current = attached ?? transaction;
-      if (created.value.status === "PENDING") {
-        const polled = await this.pollUntilTerminal(
-          created.value.pspTransactionId,
-        );
-        if (!polled.ok) {
-          await this.transactions.finalizePay(
-            settlement(current, {
-              ...created.value,
-              status: "ERROR",
-            }),
-          );
-          return polled;
-        }
-        charge = polled.value;
-      } else {
-        charge = created.value;
-      }
+      return this.settleFromPsp(transaction, transaction.pspTransactionId);
     }
 
+    const claim = await this.transactions.tryClaimCharge(transaction.id);
+    if (claim.kind === "unavailable") {
+      return this.followInFlight(transaction.id);
+    }
+
+    const created = await this.gateway.createCharge({
+      amountInCents: transaction.totalCents,
+      currency: transaction.currency,
+      customerEmail: customer.email,
+      paymentToken: tokens.value.paymentToken,
+      reference: transaction.reference,
+      acceptanceToken: tokens.value.acceptanceToken,
+      acceptPersonalAuth: tokens.value.acceptPersonalAuth,
+      installments: tokens.value.installments,
+      signature: integritySignature({
+        reference: transaction.reference,
+        amountInCents: transaction.totalCents,
+        currency: transaction.currency,
+        secret: this.settings.integritySecret,
+      }),
+    });
+    if (!created.ok) {
+      await this.transactions.releaseChargeClaim(transaction.id);
+      return created;
+    }
+    const attached = await this.transactions.attachPspCharge(transaction.id, {
+      pspTransactionId: created.value.pspTransactionId,
+      cardBrand: created.value.cardBrand,
+      cardLast4: created.value.cardLast4,
+    });
+    const current = attached ?? transaction;
+    if (created.value.status === "PENDING") {
+      return this.settleFromPsp(current, created.value.pspTransactionId);
+    }
+    return this.finalizeCharge(current, created.value);
+  }
+
+  private async followInFlight(
+    transactionId: string,
+  ): Promise<Result<CheckoutTransaction, PayTransactionError>> {
+    for (let attempt = 0; attempt < this.settings.pollMaxAttempts; attempt++) {
+      if (attempt > 0) {
+        await this.settings.sleep(this.settings.pollIntervalMs);
+      }
+      const current = await this.transactions.findById(transactionId);
+      if (!current) {
+        return err(transactionNotFound(transactionId));
+      }
+      if (isPaidTerminal(current.status)) {
+        return ok(current);
+      }
+      if (current.pspTransactionId) {
+        return this.settleFromPsp(current, current.pspTransactionId);
+      }
+    }
+    return err(pspTimeout());
+  }
+
+  private async settleFromPsp(
+    transaction: CheckoutTransaction,
+    pspTransactionId: string,
+  ): Promise<Result<CheckoutTransaction, PayTransactionError>> {
+    const polled = await this.pollUntilTerminal(pspTransactionId);
+    if (!polled.ok) {
+      await this.transactions.finalizePay(
+        settlement(transaction, {
+          pspTransactionId,
+          status: "ERROR",
+          cardBrand: transaction.cardBrand,
+          cardLast4: transaction.cardLast4,
+        }),
+      );
+      return polled;
+    }
+    return this.finalizeCharge(transaction, polled.value);
+  }
+
+  private async finalizeCharge(
+    transaction: CheckoutTransaction,
+    charge: PspCharge,
+  ): Promise<Result<CheckoutTransaction, PayTransactionError>> {
     const finalized = await this.transactions.finalizePay(
       settlement(transaction, charge),
     );

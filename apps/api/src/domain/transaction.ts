@@ -138,6 +138,13 @@ export type AttachPspChargeInput = {
   readonly cardLast4: string | null;
 };
 
+export type ClaimChargeOutcome =
+  | { readonly kind: "claimed"; readonly transaction: CheckoutTransaction }
+  | {
+      readonly kind: "unavailable";
+      readonly transaction: CheckoutTransaction | null;
+    };
+
 export type FinalizePayInput = {
   readonly id: string;
   readonly status:
@@ -161,6 +168,13 @@ export interface TransactionRepository {
     id: string,
     charge: AttachPspChargeInput,
   ): Promise<CheckoutTransaction | null>;
+  /**
+   * Atomically claims the right to call the PSP for a PENDING row that has
+   * no charge yet. Concurrent losers must follow the winner.
+   */
+  tryClaimCharge(id: string): Promise<ClaimChargeOutcome>;
+  /** Drops a claim after createCharge fails so a later pay can try again. */
+  releaseChargeClaim(id: string): Promise<void>;
   /** Persists terminal/ERROR status; assigns delivery on APPROVED; releases stock on DECLINED. */
   finalizePay(input: FinalizePayInput): Promise<CheckoutTransaction | null>;
 }

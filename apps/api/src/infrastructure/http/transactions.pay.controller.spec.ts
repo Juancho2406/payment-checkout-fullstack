@@ -149,6 +149,16 @@ class FakeTransactionRepository implements TransactionRepository {
     this.rows[index] = updated;
     return updated;
   }
+  async tryClaimCharge(id: string) {
+    const row = this.rows.find((item) => item.id === id) ?? null;
+    if (!row || row.pspTransactionId || row.status !== TRANSACTION_STATUS_PENDING) {
+      return { kind: "unavailable" as const, transaction: row };
+    }
+    return { kind: "claimed" as const, transaction: row };
+  }
+  async releaseChargeClaim(): Promise<void> {
+    return;
+  }
   async finalizePay(input: FinalizePayInput): Promise<CheckoutTransaction | null> {
     const index = this.rows.findIndex((row) => row.id === input.id);
     if (index < 0) return null;

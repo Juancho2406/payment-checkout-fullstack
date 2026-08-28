@@ -23,6 +23,7 @@ const pendingRow = {
   pspTransactionId: null,
   cardBrand: null,
   cardLast4: null,
+  chargeClaimedAt: null,
   createdAt: now,
   updatedAt: now,
 };
@@ -238,6 +239,59 @@ describe("PrismaTransactionRepository", () => {
         cardLast4: "4242",
       }),
     ).resolves.toMatchObject({ pspTransactionId: "psp-1" });
+  });
+
+  it("claims a pending charge only when updateMany matches one row", async () => {
+    const prisma = {
+      transaction: {
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+        findUnique: jest.fn().mockResolvedValue(pendingRow),
+      },
+    };
+    const repository = new PrismaTransactionRepository(
+      prisma as unknown as PrismaService,
+    );
+    await expect(repository.tryClaimCharge(pendingRow.id)).resolves.toEqual({
+      kind: "claimed",
+      transaction: toCheckoutTransaction(pendingRow),
+    });
+    await expect(repository.tryClaimCharge("not-a-uuid")).resolves.toEqual({
+      kind: "unavailable",
+      transaction: null,
+    });
+  });
+
+  it("returns unavailable when another request already claimed the charge", async () => {
+    const prisma = {
+      transaction: {
+        updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+        findUnique: jest.fn().mockResolvedValue({
+          ...pendingRow,
+          chargeClaimedAt: now,
+        }),
+      },
+    };
+    const repository = new PrismaTransactionRepository(
+      prisma as unknown as PrismaService,
+    );
+    await expect(repository.tryClaimCharge(pendingRow.id)).resolves.toEqual({
+      kind: "unavailable",
+      transaction: toCheckoutTransaction(pendingRow),
+    });
+  });
+
+  it("clears a failed charge claim", async () => {
+    const updateMany = jest.fn().mockResolvedValue({ count: 1 });
+    const repository = new PrismaTransactionRepository({
+      transaction: { updateMany },
+    } as unknown as PrismaService);
+    await repository.releaseChargeClaim(pendingRow.id);
+    expect(updateMany).toHaveBeenCalledWith({
+      where: { id: pendingRow.id, pspTransactionId: null },
+      data: { chargeClaimedAt: null },
+    });
+    await repository.releaseChargeClaim("not-a-uuid");
+    expect(updateMany).toHaveBeenCalledTimes(1);
   });
 
   it("finalizes APPROVED by assigning delivery", async () => {

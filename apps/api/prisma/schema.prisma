@@ -64,6 +64,7 @@ model Transaction {
   pspTransactionId   String?
   cardBrand          String?
   cardLast4          String?           @db.VarChar(4)
+  chargeClaimedAt    DateTime?
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
 

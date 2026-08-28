@@ -78,6 +78,7 @@ class FakeTransactionRepository implements TransactionRepository {
   constructor(readonly rows: CheckoutTransaction[]) {}
   released: { productId: string; quantity: number }[] = [];
   assigned: string[] = [];
+  claimedIds = new Set<string>();
 
   async findById(id: string): Promise<CheckoutTransaction | null> {
     return this.rows.find((row) => row.id === id) ?? null;
@@ -97,6 +98,25 @@ class FakeTransactionRepository implements TransactionRepository {
     const updated = { ...this.rows[index], ...charge };
     this.rows[index] = updated;
     return updated;
+  }
+  async tryClaimCharge(id: string): Promise<
+    | { kind: "claimed"; transaction: CheckoutTransaction }
+    | { kind: "unavailable"; transaction: CheckoutTransaction | null }
+  > {
+    const row = this.rows.find((item) => item.id === id) ?? null;
+    if (
+      !row ||
+      row.pspTransactionId ||
+      row.status !== TRANSACTION_STATUS_PENDING ||
+      this.claimedIds.has(id)
+    ) {
+      return { kind: "unavailable", transaction: row };
+    }
+    this.claimedIds.add(id);
+    return { kind: "claimed", transaction: row };
+  }
+  async releaseChargeClaim(id: string): Promise<void> {
+    this.claimedIds.delete(id);
   }
   async finalizePay(input: FinalizePayInput): Promise<CheckoutTransaction | null> {
     const index = this.rows.findIndex((row) => row.id === input.id);
@@ -124,6 +144,7 @@ class FakeTransactionRepository implements TransactionRepository {
 
 class FakePaymentGateway implements PaymentGateway {
   createCalls = 0;
+  createDelayMs = 0;
   lastCreate: CreateChargeInput | undefined;
   createResult: Result<PspCharge, PspDeclinedError> = ok(approvedCharge);
   pollQueue: PspCharge[] = [];
@@ -133,6 +154,9 @@ class FakePaymentGateway implements PaymentGateway {
   ): Promise<Result<PspCharge, PspDeclinedError>> {
     this.createCalls += 1;
     this.lastCreate = input;
+    if (this.createDelayMs > 0) {
+      await new Promise((resolve) => setTimeout(resolve, this.createDelayMs));
+    }
     return this.createResult;
   }
 
@@ -417,5 +441,35 @@ describe("PayTransactionQuery", () => {
     });
     expect(result.ok).toBe(true);
     expect(gateway.lastCreate?.installments).toBe(1);
+  });
+
+  it("charges the PSP only once when two pays race", async () => {
+    const transactions = new FakeTransactionRepository([{ ...pending }]);
+    const gateway = new FakePaymentGateway();
+    gateway.createDelayMs = 40;
+    const query = new PayTransactionQuery(
+      transactions,
+      new FakeCustomerRepository([customer]),
+      gateway,
+      {
+        ...settings,
+        pollIntervalMs: 10,
+        pollMaxAttempts: 20,
+        sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+      },
+    );
+
+    const [first, second] = await Promise.all([
+      query.execute(payBody),
+      query.execute(payBody),
+    ]);
+
+    expect(first.ok).toBe(true);
+    expect(second.ok).toBe(true);
+    expect(gateway.createCalls).toBe(1);
+    if (first.ok && second.ok) {
+      expect(first.value.status).toBe(TRANSACTION_STATUS_APPROVED);
+      expect(second.value.status).toBe(TRANSACTION_STATUS_APPROVED);
+    }
   });
 });

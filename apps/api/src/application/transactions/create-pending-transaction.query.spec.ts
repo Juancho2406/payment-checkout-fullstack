@@ -132,6 +132,14 @@ class FakeTransactionRepository implements TransactionRepository {
     throw new Error("not used");
   }
 
+  async tryClaimCharge(): Promise<never> {
+    throw new Error("not used");
+  }
+
+  async releaseChargeClaim(): Promise<never> {
+    throw new Error("not used");
+  }
+
   async finalizePay(): Promise<CheckoutTransaction | null> {
     throw new Error("not used");
   }

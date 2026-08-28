@@ -126,6 +126,9 @@
     ],
     "8ccc9113ef176ffe0df86094126d4966bfeb42ce": [
       "RM-18"
+    ],
+    "97b341c3f5b1187936dad0c15cb83b8e1d6795b4": [
+      "RM-11"
     ]
   },
   "byIssue": {
@@ -464,7 +467,7 @@
         },
         {
           "message": "fix(api): keep seed from resetting product stock",
-          "sha": ""
+          "sha": "97b341c3f5b1187936dad0c15cb83b8e1d6795b4"
         }
       ]
     },
@@ -627,6 +630,10 @@
         {
           "message": "feat(api): orchestrate sandbox payment with ROP",
           "sha": "e9e51c8ea3741df34c97c6fdeb3166d200230383"
+        },
+        {
+          "message": "fix(api): claim PSP charge before createCharge",
+          "sha": ""
         }
       ]
     },
