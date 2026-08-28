@@ -48,6 +48,22 @@ describe("ProductPage", () => {
     expect(screen.getByText(/129[.,\s]?900/)).toBeInTheDocument();
   });
 
+  it("renders every catalog product", () => {
+    const keyboard: CatalogProduct = {
+      ...headphones,
+      id: "keyboard-1",
+      name: "Teclado mecánico",
+      description: "Switch táctil, layout español.",
+      priceCents: 24990000,
+      stock: 4,
+    };
+    renderPage({ items: [headphones, keyboard], item: headphones });
+
+    expect(screen.getByRole("heading", { name: headphones.name })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: keyboard.name })).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Pagar con tarjeta de crédito" })).toHaveLength(2);
+  });
+
   it("disables pay when there is no stock", () => {
     renderPage({ item: { ...headphones, stock: 0 } });
 

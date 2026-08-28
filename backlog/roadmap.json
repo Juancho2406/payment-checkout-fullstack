@@ -117,6 +117,9 @@
     ],
     "2ae113b2cac9dcb444f2fdb3a7c1d71dbc455013": [
       "RM-26"
+    ],
+    "49ca2653c3e3dea04a253fb1a037219197c2067f": [
+      "RM-08"
     ]
   },
   "byIssue": {
@@ -372,7 +375,7 @@
         },
         {
           "message": "docs(kata): document implemented Prisma data model",
-          "sha": ""
+          "sha": "49ca2653c3e3dea04a253fb1a037219197c2067f"
         }
       ]
     },
@@ -641,6 +644,10 @@
         {
           "message": "feat(web): add product page",
           "sha": "4c22359c9081835419aa59d314726d2386150904"
+        },
+        {
+          "message": "fix(web): render the full product catalog",
+          "sha": ""
         }
       ]
     },

@@ -19,6 +19,7 @@ const reducer = {
 
 export const emptyProduct: ProductState = {
   status: "idle",
+  items: [],
   item: null,
   error: null,
 };
@@ -44,8 +45,12 @@ export function testState(
   product: Partial<ProductState> = {},
   checkout: Partial<CheckoutState> = {},
 ): RootState {
+  const merged: ProductState = { ...emptyProduct, ...product };
+  if (product.items === undefined && product.item) {
+    merged.items = [product.item];
+  }
   return {
-    product: { ...emptyProduct, ...product },
+    product: merged,
     checkout: { ...initialCheckoutState, ...checkout },
   };
 }

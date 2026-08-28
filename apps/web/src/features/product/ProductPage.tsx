@@ -1,14 +1,15 @@
 import { useEffect } from "react";
+import type { CatalogProduct } from "../../lib/api";
 import { formatCopFromCents } from "../../lib/money";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { CheckoutModal } from "../checkout/CheckoutModal";
 import { openCheckoutModal } from "../checkout/checkoutSlice";
 import { SummaryBackdrop } from "../checkout/SummaryBackdrop";
-import { loadCatalog } from "./productSlice";
+import { loadCatalog, selectProduct } from "./productSlice";
 
 export function ProductPage() {
   const dispatch = useAppDispatch();
-  const { status, item, error } = useAppSelector((state) => state.product);
+  const { status, items, error } = useAppSelector((state) => state.product);
   const modalOpen = useAppSelector((state) => state.checkout.modalOpen);
   const summaryOpen = useAppSelector((state) => state.checkout.summaryOpen);
 
@@ -39,7 +40,7 @@ export function ProductPage() {
     );
   }
 
-  if (!item) {
+  if (items.length === 0) {
     return (
       <main className="page">
         <p className="muted">No hay productos en el catálogo.</p>
@@ -47,31 +48,43 @@ export function ProductPage() {
     );
   }
 
-  const outOfStock = item.stock < 1;
+  function startCheckout(product: CatalogProduct) {
+    dispatch(selectProduct(product.id));
+    dispatch(openCheckoutModal());
+  }
 
   return (
     <main className="page">
-      <article className="card">
-        <img className="card__image" src={item.imageUrl} alt={item.name} />
-        <div className="card__body">
-          <p className="eyebrow">Producto</p>
-          <h1 className="card__title">{item.name}</h1>
-          <p className="card__description">{item.description}</p>
-          <p className="card__price">{formatCopFromCents(item.priceCents)}</p>
-          <p className="card__stock">
-            {outOfStock ? "Sin unidades" : `${item.stock} disponibles`}
-          </p>
-          <button
-            type="button"
-            className="button"
-            data-testid="pay-with-card"
-            disabled={outOfStock}
-            onClick={() => dispatch(openCheckoutModal())}
-          >
-            Pagar con tarjeta de crédito
-          </button>
-        </div>
-      </article>
+      <ul className="catalog">
+        {items.map((product) => {
+          const outOfStock = product.stock < 1;
+          return (
+            <li key={product.id}>
+              <article className="card">
+                <img className="card__image" src={product.imageUrl} alt={product.name} />
+                <div className="card__body">
+                  <p className="eyebrow">Producto</p>
+                  <h1 className="card__title">{product.name}</h1>
+                  <p className="card__description">{product.description}</p>
+                  <p className="card__price">{formatCopFromCents(product.priceCents)}</p>
+                  <p className="card__stock">
+                    {outOfStock ? "Sin unidades" : `${product.stock} disponibles`}
+                  </p>
+                  <button
+                    type="button"
+                    className="button"
+                    data-testid={`pay-with-card-${product.id}`}
+                    disabled={outOfStock}
+                    onClick={() => startCheckout(product)}
+                  >
+                    Pagar con tarjeta de crédito
+                  </button>
+                </div>
+              </article>
+            </li>
+          );
+        })}
+      </ul>
       {modalOpen ? <CheckoutModal /> : null}
       {summaryOpen ? <SummaryBackdrop /> : null}
     </main>
