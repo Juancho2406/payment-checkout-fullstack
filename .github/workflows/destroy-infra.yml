@@ -1,0 +1,69 @@
+name: Destroy Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_destroy:
+        description: 'Type "DESTROY" to confirm infrastructure deletion'
+        required: true
+        type: string
+
+concurrency:
+  group: checkout-cdk-destroy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    if: ${{ github.event.inputs.confirm_destroy == 'DESTROY' }}
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup-workspace
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+          role-duration-seconds: 3600
+
+      - name: Destroy all stacks
+        working-directory: infra/cdk
+        run: |
+          echo "🗑️ Starting infrastructure teardown..."
+          echo ""
+          echo "Destroying CheckoutWeb (CloudFront + S3)..."
+          pnpm exec cdk destroy CheckoutWeb -c target=all --force || true
+          
+          echo ""
+          echo "Destroying CheckoutApi (ECS Fargate + ALB)..."
+          pnpm exec cdk destroy CheckoutApi -c target=all --force || true
+          
+          echo ""
+          echo "Destroying CheckoutDb (RDS PostgreSQL)..."
+          pnpm exec cdk destroy CheckoutDb -c target=all --force || true
+          
+          echo ""
+          echo "Destroying CheckoutNetwork (VPC)..."
+          pnpm exec cdk destroy CheckoutNetwork -c target=all --force || true
+          
+          echo ""
+          echo "✅ Infrastructure teardown complete!"
+
+      - name: Verify destruction
+        run: |
+          echo "Listing remaining CloudFormation stacks with 'Checkout' prefix..."
+          aws cloudformation list-stacks \
+            --stack-status-filter CREATE_COMPLETE UPDATE_COMPLETE \
+            --query "StackSummaries[?starts_with(StackName, 'Checkout')].{Name:StackName,Status:StackStatus}" \
+            --output table || echo "Could not list stacks"
