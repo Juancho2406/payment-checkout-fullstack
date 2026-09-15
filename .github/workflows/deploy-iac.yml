@@ -62,7 +62,7 @@ jobs:
       - name: CDK bootstrap
         if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.platform == 'true' || steps.filter.outputs.api_stack == 'true' || steps.filter.outputs.web_stack == 'true'
         working-directory: infra/cdk
-        run: pnpm exec cdk bootstrap
+        run: pnpm exec cdk bootstrap -c target=platform
 
       - name: Deploy platform (VPC + RDS)
         if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.platform == 'true'
