@@ -123,6 +123,8 @@ export function SummaryBackdrop() {
             <div className="summary-line summary-line--total">
               <dt>Iva</dt>
               <dd>{formatCopFromCents(quote.productAmountCents * 0.19)}</dd>
+            </div>
+            <div className="summary-line summary-line--total">
               <dt>Total</dt>
               <dd>{formatCopFromCents(quote.totalCents *  1.19)}</dd>
             </div>
