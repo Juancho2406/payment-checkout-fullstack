@@ -117,8 +117,6 @@ export function SummaryBackdrop() {
               <dd>{formatCopFromCents(quote.baseFeeCents)}</dd>
             </div>
             <div className="summary-line">
-            </div>
-            <div className="summary-line">
               <dt>Envío</dt>
               <dd>{formatCopFromCents(quote.deliveryFeeCents)}</dd>
             </div>
