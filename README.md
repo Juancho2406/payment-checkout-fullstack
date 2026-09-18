@@ -2,7 +2,7 @@
 
 Kata de checkout: un producto, pago con tarjeta de prueba contra una pasarela **sandbox** (PSP; no se nombra la marca en el código). El trabajo se monta slice a slice (`RM-NN`).
 
-**Links** · Live: [https://d1ijyiafiowx0e.cloudfront.net](https://d1ijyiafiowx0e.cloudfront.net) · Swagger: [https://d1ijyiafiowx0e.cloudfront.net/docs](https://d1ijyiafiowx0e.cloudfront.net/docs) · Local web: `http://localhost:5173` · Local API: `http://localhost:3001/api/v1` · Cobertura: umbral **80%** · [Tablero](https://github.com/users/Juancho2406/projects/3)
+**Links** · Live: [https://d1ijyiafiowx0e.cloudfront.net](https://d1ijyiafiowx0e.cloudfront.net) · Swagger: [https://d1ijyiafiowx0e.cloudfront.net/docs](https://d1ijyiafiowx0e.cloudfront.net/docs) · Postman: [`docs/postman/`](docs/postman/checkout-api.postman_collection.json) · Local web: `http://localhost:5173` · Local API: `http://localhost:3001/api/v1` · Cobertura: umbral **80%** · [Tablero](https://github.com/users/Juancho2406/projects/3)
 
 En `main`, GitHub Actions **prueba todo** (`ci.yml`) y **despliega solo lo que cambió**: `apps/api` → Fargate, `apps/web` → S3/CloudFront, `infra/cdk` → VPC/RDS y plantillas CDK.
 

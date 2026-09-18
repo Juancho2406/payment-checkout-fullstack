@@ -1,0 +1,328 @@
+{
+  "info": {
+    "_postman_id": "a1c0ffee-0000-4000-8000-checkoutapi0001",
+    "name": "Payment Checkout API",
+    "description": "Consultas directas a la API (`/api/v1`). No hay auth.\n\n**Importar:** Postman → Import → esta colección + un environment (`local` o `live`).\n\n**Orden del flujo:** Health → List products (guarda `productId`) → Quote → Create customer (`customerId`) → Create delivery (`deliveryId`) → Create transaction (`transactionId`) → Get transaction.\n\n**Pay:** la API nunca recibe PAN/CVC. Tokeniza en la SPA (o contra el PSP con la llave pública) y pega `paymentToken` / `acceptanceToken` en las variables. Un retry sobre APPROVED/DECLINED es idempotente.\n\nMontos en centavos COP. Errores: `{ \"error\": { \"code\", \"message\" } }`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3001/api/v1" },
+    { "key": "productId", "value": "" },
+    { "key": "customerId", "value": "" },
+    { "key": "deliveryId", "value": "" },
+    { "key": "transactionId", "value": "" },
+    { "key": "paymentToken", "value": "tok_from_browser" },
+    { "key": "acceptanceToken", "value": "eyJ-acceptance" },
+    { "key": "acceptPersonalAuth", "value": "eyJ-personal" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('status ok', () => pm.expect(pm.response.json().status).to.eql('ok'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health",
+            "description": "Liveness. No toca Postgres."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "GET products",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json().data;",
+                  "pm.test('catalog array', () => pm.expect(data).to.be.an('array').that.is.not.empty);",
+                  "if (data && data[0] && data[0].id) {",
+                  "  pm.collectionVariables.set('productId', data[0].id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/products",
+            "description": "Lista el catálogo seed. Guarda el primer `id` en `productId`. No hay POST /products."
+          }
+        },
+        {
+          "name": "GET product by id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('has stock', () => pm.expect(pm.response.json().stock).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/products/{{productId}}",
+            "description": "Detalle + stock actual. 404 NOT_FOUND si el id no existe."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Checkout",
+      "item": [
+        {
+          "name": "POST checkout quote",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "const q = pm.response.json();",
+                  "pm.test('server owns total', () => {",
+                  "  pm.expect(q.totalCents).to.eql(q.productAmountCents + q.baseFeeCents + q.deliveryFeeCents);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 1\n}"
+            },
+            "url": "{{baseUrl}}/checkout/quote",
+            "description": "Recalcula fees en el servidor. El front no es dueño del total.\n\n409 STOCK_UNAVAILABLE si quantity > stock."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "POST customer",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('buyerEmail', 'ana+' + Date.now() + '@example.com');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "const id = pm.response.json().id;",
+                  "pm.test('id', () => pm.expect(id).to.be.a('string').that.is.not.empty);",
+                  "pm.collectionVariables.set('customerId', id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Ana Pérez\",\n  \"email\": \"{{buyerEmail}}\",\n  \"phone\": \"+573001112233\"\n}"
+            },
+            "url": "{{baseUrl}}/customers",
+            "description": "Crea o hace upsert por email. Teléfono: celular CO (3 + 9 dígitos)."
+          }
+        },
+        {
+          "name": "GET customer by id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('no PAN fields', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.not.have.property('pan');",
+                  "  pm.expect(body).to.not.have.property('cvc');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/customers/{{customerId}}",
+            "description": "Para recuperar progreso tras refresh. Nunca devuelve PAN."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Deliveries",
+      "item": [
+        {
+          "name": "POST delivery",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('draft', () => pm.expect(body.status).to.eql('draft'));",
+                  "pm.collectionVariables.set('deliveryId', body.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"address\": \"Cra 7 # 12-34\",\n  \"city\": \"Bogotá\",\n  \"region\": \"Cundinamarca\",\n  \"postalCode\": \"110111\"\n}"
+            },
+            "url": "{{baseUrl}}/deliveries",
+            "description": "Dirección en `draft`. Pasa a `assigned` solo si el cobro termina APPROVED."
+          }
+        },
+        {
+          "name": "GET delivery by id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/deliveries/{{deliveryId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "POST transaction (PENDING)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('PENDING', () => pm.expect(body.status).to.eql('PENDING'));",
+                  "pm.collectionVariables.set('transactionId', body.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"quantity\": 1,\n  \"customerId\": \"{{customerId}}\",\n  \"deliveryId\": \"{{deliveryId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/transactions",
+            "description": "Crea PENDING y reserva stock. No llama al PSP. Totales = mismo cálculo que /checkout/quote.\n\n`reference` es opcional; si falta, la API genera CHK-YYYYMMDD-XXXXXX."
+          }
+        },
+        {
+          "name": "GET transaction by id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('no tokens', () => {",
+                  "  const body = pm.response.json();",
+                  "  pm.expect(body).to.not.have.property('paymentToken');",
+                  "  pm.expect(body).to.not.have.property('pan');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/transactions/{{transactionId}}",
+            "description": "Estado para la pantalla final y para sobrevivir un refresh."
+          }
+        },
+        {
+          "name": "POST pay",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('not 5xx', () => pm.expect(pm.response.code).to.be.below(500));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentToken\": \"{{paymentToken}}\",\n  \"acceptanceToken\": \"{{acceptanceToken}}\",\n  \"acceptPersonalAuth\": \"{{acceptPersonalAuth}}\",\n  \"installments\": 1\n}"
+            },
+            "url": "{{baseUrl}}/transactions/{{transactionId}}/pay",
+            "description": "Cobra en el sandbox. **Nunca** envíes PAN ni CVC.\n\nRellena `paymentToken` y `acceptanceToken` (vienen del PSP vía el browser). Idempotente si ya está APPROVED o DECLINED.\n\n200 = recurso (APPROVED / DECLINED / PENDING intermedio). 402 PSP_DECLINED si no se pudo iniciar. 503 PSP_TIMEOUT."
+          }
+        }
+      ]
+    }
+  ]
+}

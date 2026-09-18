@@ -8,5 +8,6 @@ Contrato de la kata. Nest, Prisma, Vite y Swagger (`/docs`) están en el repo.
 | [`architecture.md`](architecture.md) | Narrativa: hexágono, ROP, qué corre dónde |
 | [`data-model.md`](data-model.md) | Prisma/Postgres: producto, cliente, transacción, entrega. Sin PAN. |
 | [`api-contract.md`](api-contract.md) | REST. El contrato vivo es Swagger en `/docs`. |
+| [`postman/`](postman/checkout-api.postman_collection.json) | Colección Postman + environments local/live. |
 
 ADRs, si hacen falta, llegan cuando una decisión deje de caber en estos tres archivos.
